@@ -179,7 +179,7 @@ void Customthrust::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
 
   //Subscribe to actuator deflection topic
   act_def_sub_topic_="/actuator_deflections";
-  // act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model_->GetName() + act_def_sub_topic_, &Customthrust::ActuatorDeflectionCallback, this);
+  act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model_->GetName() + act_def_sub_topic_, &Customthrust::ActuatorDeflectionCallback, this);
 
   // Create the first order filter.
   rotor_velocity_filter_.reset(new FirstOrderFilter<double>(time_constant_up_, time_constant_down_, ref_motor_rot_vel_));
@@ -204,9 +204,9 @@ void Customthrust::OnUpdate(const common::UpdateInfo& _info) {
   UpdateForcesAndMoments();
 
   //Custom thrust model
-  thrust_command=std::abs(joint_->GetVelocity(0))/3500.00*40.00;
+  // thrust_command=std::abs(joint_->GetVelocity(0))/3500.00*40.00;
   // thrust_command=dT_defl_/3500.00*70.00;
-  // thrust_command=dT_defl_/3500.00*40.00;
+  thrust_command=dT_defl_/3500.00*40.00;
   // thrust_command=dT_defl_*70.00;
 
   this->thrust_Intergrator=this->thrust_Intergrator+((1/this->tau_mot)*(-this->thrust_Intergrator+thrust_command*this->in_scale))*sampling_time_; //TODO: Find transmitter control stick deflection to map directly to thrust calculation.
@@ -237,14 +237,14 @@ void Customthrust::MotorFailureCallback(const boost::shared_ptr<const msgs::Int>
   motor_Failure_Number_ = fail_msg->data();
 }
 
-// void Customthrust::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
-//   dA_defl_=static_cast<double>(deflections->da());
-//   dE_defl_=static_cast<double>(deflections->de());
-//   dF_defl_=static_cast<double>(deflections->df());
-//   dR_defl_=static_cast<double>(deflections->dr());
-//   dT_defl_=static_cast<double>(deflections->dt());
+void Customthrust::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
+  dA_defl_=static_cast<double>(deflections->da());
+  dE_defl_=static_cast<double>(deflections->de());
+  dF_defl_=static_cast<double>(deflections->df());
+  dR_defl_=static_cast<double>(deflections->dr());
+  dT_defl_=static_cast<double>(deflections->dt());
 
-// }
+}
 
 void Customthrust::UpdateForcesAndMoments() {
   motor_rot_vel_ = joint_->GetVelocity(0);

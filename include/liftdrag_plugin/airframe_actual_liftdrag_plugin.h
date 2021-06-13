@@ -26,7 +26,7 @@
 #include "gazebo/transport/TransportTypes.hh"
 #include <ignition/math.hh>
 #include <gazebo/gazebo.hh>
-// #include "ActuatorDeflections.pb.h"
+#include "ActuatorDeflections.pb.h"
 #include <math.h>
 #include <random>
 #include <iostream>
@@ -40,7 +40,7 @@
 namespace gazebo
 {
 
-  // typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+  typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
 
   /// \brief A plugin that simulates lift and drag.
   class GAZEBO_VISIBLE AirframeActualLiftDragPlugin : public ModelPlugin
@@ -276,7 +276,7 @@ namespace gazebo
       double dR_defl_;
       double dT_defl_;
       transport::SubscriberPtr act_def_sub_;
-      // void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
+      void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
 
     private: ignition::math::Vector3d wind_vel_=ignition::math::Vector3d(0,0,0);
     private: double now=0;

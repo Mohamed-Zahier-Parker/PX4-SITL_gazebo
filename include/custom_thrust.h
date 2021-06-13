@@ -35,7 +35,7 @@
 #include "MotorSpeed.pb.h"
 #include "Float.pb.h"
 #include "Wind.pb.h"
-// #include "ActuatorDeflections.pb.h"
+#include "ActuatorDeflections.pb.h"
 
 #include "common.h"
 
@@ -55,7 +55,7 @@ std::string wind_sub_topic_ = "/world_wind";
 
 typedef const boost::shared_ptr<const mav_msgs::msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
-// typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
 
 /*
 // Protobuf test
@@ -178,7 +178,7 @@ class Customthrust : public MotorModel, public ModelPlugin {
   void VelocityCallback(CommandMotorSpeedPtr &rot_velocities);
   void MotorFailureCallback(const boost::shared_ptr<const msgs::Int> &fail_msg);  /*!< Callback for the motor_failure_sub_ subscriber */
   void WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg);
-  // void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
+  void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
 
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 /*

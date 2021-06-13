@@ -304,7 +304,7 @@ set(sensor_msgs
   )
 
 #Actuator Control Message#
-# set(act_msgs msgs/ActuatorDeflections.proto)
+set(act_msgs msgs/ActuatorDeflections.proto)
 
 PROTOBUF_GENERATE_CPP(MAV_PROTO_SRCS MAV_PROTO_HDRS ${mav_msgs})
 PROTOBUF_GENERATE_CPP(NAV_PROTO_SRCS NAV_PROTO_HDRS ${nav_msgs})
@@ -312,7 +312,7 @@ PROTOBUF_GENERATE_CPP(PHY_PROTO_SRCS PHY_PROTO_HDRS ${physics_msgs})
 PROTOBUF_GENERATE_CPP(STD_PROTO_SRCS STD_PROTO_HDRS ${std_msgs})
 PROTOBUF_GENERATE_CPP(SEN_PROTO_SRCS SEN_PROTO_HDRS ${sensor_msgs})
 
-# PROTOBUF_GENERATE_CPP(ACT_PROTO_SRCS SEN_PROTO_HDRS ${act_msgs})
+PROTOBUF_GENERATE_CPP(ACT_PROTO_SRCS SEN_PROTO_HDRS ${act_msgs})
 
 add_library(mav_msgs SHARED ${MAV_PROTO_SRCS})
 add_library(nav_msgs SHARED ${NAV_PROTO_SRCS})
@@ -320,7 +320,7 @@ add_library(physics_msgs SHARED ${PHY_PROTO_SRCS})
 add_library(std_msgs SHARED ${STD_PROTO_SRCS})
 add_library(sensor_msgs SHARED ${SEN_PROTO_SRCS})
 
-# add_library(act_msgs SHARED ${ACT_PROTO_SRCS})
+add_library(act_msgs SHARED ${ACT_PROTO_SRCS})
 
 #---------#
 # Plugins #
@@ -328,7 +328,7 @@ add_library(sensor_msgs SHARED ${SEN_PROTO_SRCS})
 
 link_libraries(mav_msgs nav_msgs std_msgs sensor_msgs)
 link_libraries(physics_msgs)
-# link_libraries(act_msgs)
+link_libraries(act_msgs)
 
 add_library(gazebo_airspeed_plugin SHARED src/gazebo_airspeed_plugin.cpp)
 add_library(gazebo_geotagged_images_plugin SHARED src/gazebo_geotagged_images_plugin.cpp)
@@ -452,7 +452,7 @@ list(APPEND plugins AirframeActualLiftDragPlugin)
 foreach(plugin ${plugins})
   add_dependencies(${plugin} mav_msgs nav_msgs std_msgs sensor_msgs)
   add_dependencies(${plugin} physics_msgs)
-  # add_dependencies(${plugin} act_msgs)
+  add_dependencies(${plugin} act_msgs)
 endforeach()
 
 # Configure the setup script
@@ -485,8 +485,8 @@ file(GLOB models_list LIST_DIRECTORIES true ${PROJECT_SOURCE_DIR}/models/*)
 file(REMOVE_RECURSE ${PROJECT_SOURCE_DIR}/worlds/.DS_Store)
 file(GLOB worlds_list LIST_DIRECTORIES true ${PROJECT_SOURCE_DIR}/worlds/*)
 
-install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs DESTINATION ${PLUGIN_PATH})
-# install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs act_msgs DESTINATION ${PLUGIN_PATH})
+# install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs DESTINATION ${PLUGIN_PATH})
+install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs act_msgs DESTINATION ${PLUGIN_PATH})
 install(DIRECTORY ${models_list} DESTINATION ${MODEL_PATH})
 install(FILES ${worlds_list} DESTINATION ${RESOURCE_PATH}/worlds)
 

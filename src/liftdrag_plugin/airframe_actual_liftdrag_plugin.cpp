@@ -185,8 +185,8 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
   node_handle_->Init(namespace_);
 
   //Subscribe to actuator deflection topic
-  // act_def_sub_topic_="/actuator_deflections";
-  // act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model->GetName() + act_def_sub_topic_, &AirframeActualLiftDragPlugin::ActuatorDeflectionCallback, this);
+  act_def_sub_topic_="/actuator_deflections";
+  act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model->GetName() + act_def_sub_topic_, &AirframeActualLiftDragPlugin::ActuatorDeflectionCallback, this);
 
 
   if (_sdf->HasElement("windSubTopic")){
@@ -988,13 +988,13 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
 //             msg->velocity().z());
 // }
 
-// void AirframeActualLiftDragPlugin::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
-//   dA_defl_=deflections->da();
-//   dE_defl_=deflections->de();
-//   dF_defl_=deflections->df();
-//   dR_defl_=deflections->dr();
-//   dT_defl_=deflections->dt();
-// }
+void AirframeActualLiftDragPlugin::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
+  dA_defl_=deflections->da();
+  dE_defl_=deflections->de();
+  dF_defl_=deflections->df();
+  dR_defl_=deflections->dr();
+  dT_defl_=deflections->dt();
+}
 
 void AirframeActualLiftDragPlugin::WorldStatsCallback(ConstWorldStatisticsPtr &_msg){
   sim_time_=_msg->sim_time();
