@@ -1,0 +1,11 @@
+syntax = "proto2";
+package act_msgs.msgs;
+
+message ActuatorDeflections
+{
+  required double   dA  = 1 ;
+  required double   dE  = 2 ;
+  required double   dF  = 3 ;
+  required double   dR  = 4 ;
+  required double   dT  = 5 ;
+}

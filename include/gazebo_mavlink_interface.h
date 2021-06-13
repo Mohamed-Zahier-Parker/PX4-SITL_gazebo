@@ -69,6 +69,7 @@
 #include <MagneticField.pb.h>
 #include <Pressure.pb.h>
 #include <Wind.pb.h>
+// #include <ActuatorDeflections.pb.h>
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
@@ -107,6 +108,9 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> Magnetom
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Pressure> BarometerPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
 
+//Actuator deflection message pointer
+// typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+
 typedef std::pair<const int, const ignition::math::Quaterniond> SensorIdRot_P;
 typedef std::map<transport::SubscriberPtr, SensorIdRot_P > Sensor_M;
 
@@ -125,6 +129,8 @@ static const std::string kDefaultMagTopic = "/mag";
 static const std::string kDefaultAirspeedTopic = "/airspeed";
 static const std::string kDefaultBarometerTopic = "/baro";
 static const std::string kDefaultWindTopic = "/world_wind";
+
+// static const std::string kDefaultActuatorControlPubTopic = "/actuator_deflections";
 
 //! Rx packer framing status. (same as @p mavlink::mavlink_framing_t)
 enum class Framing : uint8_t {
@@ -246,9 +252,14 @@ private:
   std::string mavlink_control_sub_topic_;
   std::string link_name_;
 
+  // Actuator Deflection Topic
+  // std::string actuator_deflection_pub_topic_{kDefaultActuatorControlPubTopic};
+
   transport::NodePtr node_handle_;
   transport::PublisherPtr motor_velocity_reference_pub_;
   transport::SubscriberPtr mav_control_sub_;
+
+  // transport::PublisherPtr actuator_deflection_pub_;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;

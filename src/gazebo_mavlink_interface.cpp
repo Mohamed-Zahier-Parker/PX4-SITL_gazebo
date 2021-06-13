@@ -373,6 +373,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<mav_msgs::msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
 
+  // Publish actuator deflection messages
+  // actuator_deflection_pub_ = node_handle_->Advertise<act_msgs::msgs::ActuatorDeflections>("~/" + model_->GetName() + actuator_deflection_pub_topic_, 1);
+
+
 #if GAZEBO_MAJOR_VERSION >= 9
   last_time_ = world_->SimTime();
   last_imu_time_ = world_->SimTime();
@@ -697,6 +701,17 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
 
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+
+    // //Actuator delfection publishing
+    // act_msgs::msgs::ActuatorDeflections act_def_msg;
+
+    // act_def_msg.set_da(input_reference_[6]);
+    // act_def_msg.set_de(input_reference_[7]);
+    // act_def_msg.set_df(input_reference_[3]);
+    // act_def_msg.set_dr(input_reference_[2]);
+    // act_def_msg.set_dt(input_reference_[4]);
+
+    // actuator_deflection_pub_->Publish(act_def_msg);
   }
 
   last_time_ = current_time;
