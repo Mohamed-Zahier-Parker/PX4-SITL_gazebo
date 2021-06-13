@@ -213,6 +213,16 @@ void Customthrust::OnUpdate(const common::UpdateInfo& _info) {
   // this->thrust_Intergrator=ignition::math::clamp(std::abs(this->thrust_Intergrator), 0.0, 70.0);//limit thrust to 70N and ensure it is positive
   this->thrust_Intergrator=ignition::math::clamp(std::abs(this->thrust_Intergrator), 0.0, 40.0);//limit thrust to 40N and ensure it is positive
   baselink_->AddRelativeForce(ignition::math::Vector3d(this->thrust_Intergrator,0,0));//Apply force to model
+  //Test
+  // ignition::math::Pose3d pose = this->link_->WorldPose();
+  // if(this->thrust_Intergrator>35){
+  //   if(pose.Z()>5){
+  //     baselink_->AddRelativeForce(ignition::math::Vector3d(this->thrust_Intergrator,0,0));//Apply force to model
+  //   }else{
+  //     baselink_->AddRelativeForce(ignition::math::Vector3d(150.0,0,0));//Apply force to model
+  //   }
+  // }
+  // link_->AddRelativeForce(ignition::math::Vector3d(0, 0, this->thrust_Intergrator));
   //debug
   // std::cout<<"Thrust : "<<this->thrust_Intergrator<<"\n";
   disp_count++;
@@ -271,6 +281,7 @@ void Customthrust::UpdateForcesAndMoments() {
   scalar = ignition::math::clamp(scalar, 0.0, 1.0);
   // Apply a force to the link.
   // link_->AddRelativeForce(ignition::math::Vector3d(0, 0, force * scalar));
+  // std::cout<<"gazebo_motor"<<force * scalar<<"\n";
 
   // Forces from Philppe Martin's and Erwan Salaün's
   // 2010 IEEE Conference on Robotics and Automation paper

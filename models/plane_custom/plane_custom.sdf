@@ -6,14 +6,14 @@
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>1.5</mass>
+        <mass>6.35</mass>
         <inertia>
-          <ixx>0.197563</ixx>
+          <ixx>0.722</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.1458929</iyy>
+          <iyy>0.514</iyy>
           <iyz>0</iyz>
-          <izz>0.1477</izz>
+          <izz>0.925</izz>
         </inertia>
       </inertial>
       <collision name='base_link_collision'>
@@ -624,10 +624,76 @@
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
-    <plugin name='puller' filename='libgazebo_motor_model.so'>
+	<plugin name="aircraft_actual_liftdrag" filename="libAirframeActualLiftDragPlugin.so">
+      <a0>0.05984281113</a0>
+      <cla>4.752798721</cla>
+      <cda>0.6417112299</cda>
+      <cma>0.0</cma>
+      <alpha_stall>0.3391428111</alpha_stall>
+      <cla_stall>-3.85</cla_stall>
+      <cda_stall>-0.9233984055</cda_stall>
+      <cma_stall>0</cma_stall>
+      <cp>-0.05 0.45 0.05</cp>
+      <area>0.6</area>
+      <air_density>1.225</air_density>
+      <forward>1 0 0</forward>
+      <upward>0 0 1</upward>
+      <link_name>base_link</link_name>
+      <control_joint_name>
+        left_elevon_joint
+      </control_joint_name>
+	  <control_joint_name_dA>right_elevon_joint</control_joint_name_dA>
+      <control_joint_name_dE>elevator_joint</control_joint_name_dE>
+      <control_joint_name_dR>rudder_joint</control_joint_name_dR>
+      <control_joint_name_dF>left_flap_joint</control_joint_name_dF>
+      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
+	  <S>0.6975</S>
+      <b>1.918</b>
+      <cbar>0.363</cbar>
+      <A>5.28</A>
+      <e>0.858></e>
+      <C_L_0>0.243200</C_L_0>
+      <C_L_alpha>4.240906</C_L_alpha>
+      <C_L_Q>7.046092</C_L_Q>
+      <C_L_dE>0.419064</C_L_dE>
+      <C_L_dF>0.936323</C_L_dF>
+      <C_D_0>0.033600</C_D_0>
+      <C_y_beta>-0.211019</C_y_beta>
+      <C_y_P>0.108287</C_y_P>
+      <C_y_R>0.150403</C_y_R>
+      <C_y_dA>0.000780</C_y_dA>
+      <C_y_dR>0.115794</C_y_dR>
+      <C_l_beta>-0.056602</C_l_beta>
+      <C_l_P>-0.415489</C_l_P>
+      <C_l_R>0.127831</C_l_R>
+      <C_l_dA>-0.257631</C_l_dA>
+      <C_l_dR>0.000920</C_l_dR>
+      <C_n_beta>0.038208</C_n_beta>
+      <C_n_P>-0.031465</C_n_P>
+      <C_n_R>-0.067882</C_n_R>
+      <C_n_dA>0.007213</C_n_dA>
+      <C_n_dR>-0.049972</C_n_dR>
+      <C_m_0>-0.026700</C_m_0>
+      <C_m_alpha>-0.780993</C_m_alpha>
+      <C_m_Q>-7.220962</C_m_Q>
+      <C_m_dE>-0.922107</C_m_dE>
+      <C_m_dF>0.111822</C_m_dF>
+      <V_20>2.7</V_20>
+      <Vm>4</Vm>
+      <ts>100</ts>
+      <dm>100</dm>
+      <ds>400</ds>
+      <gust_direction>1 0 0</gust_direction>
+      <V_20_shear>2.7</V_20_shear>
+      <shear_direction>0 1 0</shear_direction>
+      <robotNamespace></robotNamespace>
+      <windSubTopic>world_wind</windSubTopic>
+    </plugin>
+	<plugin name='thrust' filename='libcustom_thrust.so'>
       <robotNamespace></robotNamespace>
       <jointName>rotor_puller_joint</jointName>
       <linkName>rotor_puller</linkName>
+	  <baselinkName>base_link</baselinkName>
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
@@ -638,6 +704,8 @@
       <motorNumber>4</motorNumber>
       <rotorDragCoefficient>8.06428e-05</rotorDragCoefficient>
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
+	  <tau_mot>0.25</tau_mot>
+      <in_scale>1.00</in_scale>
       <motorSpeedPubTopic>/motor_speed/4</motorSpeedPubTopic>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
       <robotNamespace></robotNamespace>

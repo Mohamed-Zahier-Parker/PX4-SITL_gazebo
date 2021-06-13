@@ -154,9 +154,9 @@ void LiftDragPlugin::Load(physics::ModelPtr _model,
           boost::bind(&LiftDragPlugin::OnUpdate, this));
     }
 
-    
+
   }
-  
+
   if (_sdf->HasElement("robotNamespace"))
   {
     namespace_ = _sdf->GetElement("robotNamespace")->Get<std::string>();
@@ -389,6 +389,10 @@ void LiftDragPlugin::OnUpdate()
 
   // force about cg in inertial frame
   ignition::math::Vector3d force = lift + drag;
+
+  force=ignition::math::Vector3d(0.0,0.0,0.0);
+  moment=ignition::math::Vector3d(0.0,0.0,0.0);
+
 
   // debug
   //
