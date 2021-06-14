@@ -199,6 +199,7 @@ void Customthrust::testProto(MotorSpeedPtr &msg) {
 
 // This gets called by the world update start event.
 void Customthrust::OnUpdate(const common::UpdateInfo& _info) {
+  // std::cout<<"Running Custom Thrust Plugin\n";
   sampling_time_ = _info.simTime.Double() - prev_sim_time_;
   prev_sim_time_ = _info.simTime.Double();
   UpdateForcesAndMoments();

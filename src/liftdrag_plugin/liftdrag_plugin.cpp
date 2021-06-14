@@ -188,6 +188,7 @@ void LiftDragPlugin::Load(physics::ModelPtr _model,
 /////////////////////////////////////////////////
 void LiftDragPlugin::OnUpdate()
 {
+  // std::cout<<"Testing LiftDragPlugin\n";
   GZ_ASSERT(this->link, "Link was NULL");
   // get linear velocity at cp in inertial frame
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -390,8 +391,8 @@ void LiftDragPlugin::OnUpdate()
   // force about cg in inertial frame
   ignition::math::Vector3d force = lift + drag;
 
-  force=ignition::math::Vector3d(0.0,0.0,0.0);
-  moment=ignition::math::Vector3d(0.0,0.0,0.0);
+  // force=ignition::math::Vector3d(0.0,0.0,0.0);
+  // moment=ignition::math::Vector3d(0.0,0.0,0.0);
 
 
   // debug

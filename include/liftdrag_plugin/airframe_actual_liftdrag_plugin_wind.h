@@ -39,7 +39,9 @@
 
 namespace gazebo
 {
+
   typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+
   /// \brief A plugin that simulates lift and drag.
   class GAZEBO_VISIBLE AirframeActualLiftDragPlugin : public ModelPlugin
   {
@@ -253,13 +255,14 @@ namespace gazebo
     /// \brief SDF for this plugin;
     protected: sdf::ElementPtr sdf;
 
-    //private: void WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg);
+    private: void WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg);
 
     private: transport::NodePtr node_handle_;
     private: transport::SubscriberPtr wind_sub_;
     private: std::string namespace_;
     private: std::string wind_sub_topic_ = "world_wind";
     // private: ignition::math::Vector3d wind_vel_;
+
     private: std::string act_def_sub_topic_;
     private: transport::SubscriberPtr world_stats_sub_;
     private: std::string world_stats_sub_topic_ = "world_stats";
@@ -284,7 +287,6 @@ namespace gazebo
       transport::PublisherPtr wind_pub_;
       physics_msgs::msgs::Wind wind_msg;
       double pub_rate = 2.0;
-
   };
 }
 #endif

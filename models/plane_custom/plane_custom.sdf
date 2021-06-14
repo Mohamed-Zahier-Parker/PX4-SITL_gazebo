@@ -496,134 +496,6 @@
       <child>gps::link</child>
       <parent>base_link</parent>
     </joint>
-    <plugin name="left_wing" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.05 0.45 0.05</cp>
-      <area>0.6</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 0 1</upward>
-      <link_name>base_link</link_name>
-      <control_joint_name>
-        left_elevon_joint
-      </control_joint_name>
-      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
-    <plugin name="right_wing" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.05 -0.45 0.05</cp>
-      <area>0.6</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 0 1</upward>
-      <link_name>base_link</link_name>
-      <control_joint_name>
-        right_elevon_joint
-      </control_joint_name>
-      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
-    <plugin name="left_flap" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.05 0.15 0.05</cp>
-      <area>0.6</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 0 1</upward>
-      <link_name>base_link</link_name>
-      <control_joint_name>
-        left_flap_joint
-      </control_joint_name>
-      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
-    <plugin name="right_flap" filename="libLiftDragPlugin.so">
-      <a0>0.05984281113</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.05 -0.15 0.05</cp>
-      <area>0.6</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 0 1</upward>
-      <link_name>base_link</link_name>
-      <control_joint_name>
-        right_flap_joint
-      </control_joint_name>
-      <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
-    <plugin name="elevator" filename="libLiftDragPlugin.so">
-      <a0>-0.2</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.5 0 0</cp>
-      <area>0.01</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 0 1</upward>
-      <link_name>base_link</link_name>
-      <control_joint_name>
-        elevator_joint
-      </control_joint_name>
-      <control_joint_rad_to_cl>-4.0</control_joint_rad_to_cl>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
-    <plugin name="rudder" filename="libLiftDragPlugin.so">
-      <a0>0.0</a0>
-      <cla>4.752798721</cla>
-      <cda>0.6417112299</cda>
-      <cma>0.0</cma>
-      <alpha_stall>0.3391428111</alpha_stall>
-      <cla_stall>-3.85</cla_stall>
-      <cda_stall>-0.9233984055</cda_stall>
-      <cma_stall>0</cma_stall>
-      <cp>-0.5 0 0.05</cp>
-      <area>0.02</area>
-      <air_density>1.2041</air_density>
-      <forward>1 0 0</forward>
-      <upward>0 1 0</upward>
-      <link_name>base_link</link_name>
-      <robotNamespace></robotNamespace>
-      <windSubTopic>world_wind</windSubTopic>
-    </plugin>
 	<plugin name="aircraft_actual_liftdrag" filename="libAirframeActualLiftDragPlugin.so">
       <a0>0.05984281113</a0>
       <cla>4.752798721</cla>
@@ -642,10 +514,18 @@
       <control_joint_name>
         left_elevon_joint
       </control_joint_name>
-	  <control_joint_name_dA>right_elevon_joint</control_joint_name_dA>
-      <control_joint_name_dE>elevator_joint</control_joint_name_dE>
-      <control_joint_name_dR>rudder_joint</control_joint_name_dR>
-      <control_joint_name_dF>left_flap_joint</control_joint_name_dF>
+	  <control_joint_name_dA>
+		right_elevon_joint
+	  </control_joint_name_dA>
+      <control_joint_name_dE>
+		elevator_joint
+	  </control_joint_name_dE>
+      <control_joint_name_dR>
+		rudder_joint
+	  </control_joint_name_dR>
+      <control_joint_name_dF>
+		left_flap_joint
+	  </control_joint_name_dF>
       <control_joint_rad_to_cl>-0.5</control_joint_rad_to_cl>
 	  <S>0.6975</S>
       <b>1.918</b>
@@ -710,6 +590,14 @@
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
+    </plugin>
+	<plugin name='catapult_plugin' filename='libgazebo_catapult_plugin.so'>
+      <robotNamespace/>
+      <link_name>plane_custom::base_link</link_name>
+      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>4</motorNumber>
+      <force>150.0</force>
+      <duration>1</duration>
     </plugin>
     <plugin name='gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
       <robotNamespace></robotNamespace>

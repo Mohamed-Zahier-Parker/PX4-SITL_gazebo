@@ -26,6 +26,7 @@
 #include "gazebo/msgs/msgs.hh"
 #include "liftdrag_plugin/airframe_actual_liftdrag_plugin.h"
 
+
 using namespace gazebo;
 
 GZ_REGISTER_MODEL_PLUGIN(AirframeActualLiftDragPlugin)
@@ -86,6 +87,7 @@ AirframeActualLiftDragPlugin::~AirframeActualLiftDragPlugin()
 void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
                      sdf::ElementPtr _sdf)
 {
+  std::cout<<"Running Airframe Actual Lift Drag Plugin\n";
   GZ_ASSERT(_model, "AirframeActualLiftDragPlugin _model pointer is NULL");
   GZ_ASSERT(_sdf, "AirframeActualLiftDragPlugin _sdf pointer is NULL");
   this->model = _model;
@@ -183,18 +185,15 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
   node_handle_ = transport::NodePtr(new transport::Node());
   node_handle_->Init(namespace_);
 
-  if (_sdf->HasElement("windSubTopic")){
-    this->wind_sub_topic_ = _sdf->Get<std::string>("windSubTopic");
-    //wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &AirframeActualLiftDragPlugin::WindVelocityCallback, this);
-  }
-
   //Subscribe to actuator deflection topic
   act_def_sub_topic_="/actuator_deflections";
   act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model->GetName() + act_def_sub_topic_, &AirframeActualLiftDragPlugin::ActuatorDeflectionCallback, this);
 
-  //Subscribe to world stats topic
-  world_stats_sub_ = node_handle_->Subscribe("~/" + world_stats_sub_topic_, &AirframeActualLiftDragPlugin::WorldStatsCallback, this);
 
+  if (_sdf->HasElement("windSubTopic")){
+    this->wind_sub_topic_ = _sdf->Get<std::string>("windSubTopic");
+    wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &AirframeActualLiftDragPlugin::WindVelocityCallback, this);
+  }
 
   if (_sdf->HasElement("control_joint_name"))
   {
@@ -206,7 +205,7 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
     }
   }
 
-    if (_sdf->HasElement("control_joint_name_dA"))
+  if (_sdf->HasElement("control_joint_name_dA"))
   {
     std::string controlJointNamedA = _sdf->Get<std::string>("control_joint_name_dA");
     this->controlJointdA = this->model->GetJoint(controlJointNamedA);
@@ -216,7 +215,7 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
     }
   }
 
-    if (_sdf->HasElement("control_joint_name_dE"))
+  if (_sdf->HasElement("control_joint_name_dE"))
   {
     std::string controlJointNamedE = _sdf->Get<std::string>("control_joint_name_dE");
     this->controlJointdE = this->model->GetJoint(controlJointNamedE);
@@ -226,7 +225,7 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
     }
   }
 
-    if (_sdf->HasElement("control_joint_name_dR"))
+  if (_sdf->HasElement("control_joint_name_dR"))
   {
     std::string controlJointNamedR = _sdf->Get<std::string>("control_joint_name_dR");
     this->controlJointdR = this->model->GetJoint(controlJointNamedR);
@@ -236,7 +235,7 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
     }
   }
 
-    if (_sdf->HasElement("control_joint_name_dF"))
+  if (_sdf->HasElement("control_joint_name_dF"))
   {
     std::string controlJointNamedF = _sdf->Get<std::string>("control_joint_name_dF");
     this->controlJointdF = this->model->GetJoint(controlJointNamedF);
@@ -259,7 +258,6 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
     this->A = _sdf->Get<double>("A");
   if (_sdf->HasElement("e"))
     this->e = _sdf->Get<double>("e");
-
   if (_sdf->HasElement("C_L_0"))
     this->C_L_0 = _sdf->Get<double>("C_L_0");
   if (_sdf->HasElement("C_L_alpha"))
@@ -345,7 +343,9 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
 /////////////////////////////////////////////////
 void AirframeActualLiftDragPlugin::OnUpdate()
 {
-  // std::cout<<"Testing AirframeActualLiftDragPlugin\n";
+
+  std::cout<<"Running Airframe Actual Lift Drag Plugin\n";
+
   GZ_ASSERT(this->link, "Link was NULL");
   // get linear velocity at cp in inertial frame
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -448,6 +448,7 @@ void AirframeActualLiftDragPlugin::OnUpdate()
     this->beta = this->beta > 0 ? this->beta - M_PI
                                   : this->beta + M_PI;
 
+
   // compute angle between upwardI and liftI
   // in general, given vectors a and b:
   //   cos(theta) = a.Dot(b)/(a.Length()*b.Lenghth())
@@ -513,7 +514,7 @@ void AirframeActualLiftDragPlugin::OnUpdate()
     /// \TODO: also change cd
   }
 
-  //!!!Check:FIX!!!
+    //!!!Check:FIX!!!
   if (this->controlJointdA)
   {
 #if GAZEBO_MAJOR_VERSION >= 9
@@ -547,21 +548,18 @@ void AirframeActualLiftDragPlugin::OnUpdate()
     dF = this->controlJointdF->GetAngle(0).Radian();
 #endif
   }
-
   //Get actuator deflections direclty from topic instead of control surface angle
-// dA=dA_defl_;
-// dE=dE_defl_;
-// dR=dR_defl_;
-// dF=dF_defl_;
-
-//Testing that the delfections between controllers and gazebo model
-dT_defl_=dT_defl_/3500.00*40.00;
-
-//Compensate for Gazebo diffrent axis direction
-dA=-dA;
-dE=-dE;
-dR=-dR;
-dF=-dF;
+  // dA=dA_defl_;
+  // dE=dE_defl_;
+  dR=dR_defl_;
+  // dF=dF_defl_;
+  //Testing that the delfections between controllers and gazebo model
+  // dT_defl_=dT_defl_/3500.00*40.00;
+  //Compensate for Gazebo diffrent axis direction
+  dA=-dA;
+  dE=-dE;
+  dR=-dR;
+  dF=-dF;
 
 // if(disp_count%5==0){
 //   printf("Airframe_Lift_Drag\n");
@@ -814,7 +812,6 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   wind_pub_->Publish(wind_msg);
 }
 
-
   // compute lift force at cp
   ignition::math::Vector3d lift = cl * q * this->area * liftI;
 
@@ -905,6 +902,20 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
 //   printf("\n");
 // }
 
+  // compute moment (torque) at cp
+  // ignition::math::Vector3d moment = cm * q * this->area * momentDirection;
+
+#if GAZEBO_MAJOR_VERSION >= 9
+  ignition::math::Vector3d cog = this->link->GetInertial()->CoG();
+#else
+  ignition::math::Vector3d cog = ignitionFromGazeboMath(this->link->GetInertial()->GetCoG());
+#endif
+
+
+
+  // force about cg in inertial frame
+  // ignition::math::Vector3d force = lift + drag;
+
   // Workout forces at centre of mass in body frame
   double X=q*this->S*C_X;
   double Y=q*this->S*C_y;
@@ -927,21 +938,7 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   ignition::math::Vector3 moment=ignition::math::Vector3(L,M,N);
   //ignition::math::Vector3 moment=InvDCM.operator*(momentb);
 
-  // compute moment (torque) at cp
-  // ignition::math::Vector3d moment = cm * q * this->area * momentDirection;
-
-// #if GAZEBO_MAJOR_VERSION >= 9
-//   ignition::math::Vector3d cog = this->link->GetInertial()->CoG();
-// #else
-//   ignition::math::Vector3d cog = ignitionFromGazeboMath(this->link->GetInertial()->GetCoG());
-// #endif
-
-//   // force about cg in inertial frame
-//   ignition::math::Vector3d force = lift + drag;
-
-//   force=ignition::math::Vector3d(0.0,0.0,0.0);
-//   moment=ignition::math::Vector3d(0.0,0.0,0.0);
-
+  disp_count=disp_count+1;
 
   // debug
   //
@@ -986,6 +983,8 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   //add force and torque on the aircraft
   this->link->AddRelativeForce(force);
   this->link->AddRelativeTorque(moment);
+
+  std::cout<<"Moment x : "<<force.X()<<"\n";
 
 }
 
