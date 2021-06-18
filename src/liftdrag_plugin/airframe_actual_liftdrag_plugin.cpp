@@ -549,10 +549,10 @@ void AirframeActualLiftDragPlugin::OnUpdate()
   }
 
   //Get actuator deflections direclty from topic instead of control surface angle
-// dA=dA_defl_;
-// dE=dE_defl_;
-// dR=dR_defl_;
-// dF=dF_defl_;
+dA=dA_defl_;
+dE=dE_defl_;
+dR=dR_defl_;
+dF=dF_defl_;
 
 //Testing that the delfections between controllers and gazebo model
 dT_defl_=dT_defl_/3500.00*40.00;
