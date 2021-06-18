@@ -666,6 +666,11 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   }else{
     V_gust=0;
   }
+  //Convert gust from body to inertial
+  // ignition::math::Vector3d Gust_linear_body = ignition::math::Vector3d(V_gust*(double)((this->gust_direction).X()),V_gust*(double)((this->gust_direction).Y()),V_gust*(double)((this->gust_direction).Z()));
+  // ignition::math::Vector3d Gust_linear_inertial=InvDCM.operator*(Gust_linear_body);
+  ignition::math::Vector3d Gust_linear_inertial = ignition::math::Vector3d(V_gust*(double)((this->gust_direction).X()),V_gust*(double)((this->gust_direction).Y()),V_gust*(double)((this->gust_direction).Z()));
+
 
   /*Turbulence*/
   // //Assume aircraft will be under 1000ft(304.8m) !!!Check if h and V are in matric or imperial units!!!
@@ -784,21 +789,24 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   }
   //Convert to metric
   V_shear=V_shear/3.28084;
+  // ignition::math::Vector3d Shear_linear_body = ignition::math::Vector3d(V_shear*(double)((this->shear_direction).X()),V_shear*(double)((this->shear_direction).Y()),V_shear*(double)((this->shear_direction).Z()));
+  // ignition::math::Vector3d Shear_linear_inertial=InvDCM.operator*(Shear_linear_body);
+  ignition::math::Vector3d Shear_linear_inertial = ignition::math::Vector3d(V_shear*(double)((this->shear_direction).X()),V_shear*(double)((this->shear_direction).Y()),V_shear*(double)((this->shear_direction).Z()));
 
 
   /*Net effect of wind*/
   //All Wind
-  double lin_wind_x=V_gust*(double)((this->gust_direction).X())+Turb_force_inertial.X()+V_shear*(double)((this->shear_direction).X());
-  double lin_wind_y=V_gust*(double)((this->gust_direction).Y())+Turb_force_inertial.Y()+V_shear*(double)((this->shear_direction).Y());
-  double lin_wind_z=V_gust*(double)((this->gust_direction).Z())+Turb_force_inertial.Z()+V_shear*(double)((this->shear_direction).Z());
+  double lin_wind_x=Gust_linear_inertial.X()+Turb_force_inertial.X()+Shear_linear_inertial.X();
+  double lin_wind_y=Gust_linear_inertial.Y()+Turb_force_inertial.Y()+Shear_linear_inertial.Y();
+  double lin_wind_z=Gust_linear_inertial.Z()+Turb_force_inertial.Z()+Shear_linear_inertial.Z();
   custom_wind_lin_vel_=ignition::math::Vector3d(lin_wind_x,lin_wind_y,lin_wind_z);
   custom_wind_ang_vel_=Turb_moment_inertial;
-  // printf("lin_wind_x : %f ; lin_wind_y : %f ; lin_wind_z : %f ; \n",lin_wind_x,lin_wind_y,lin_wind_z);
-  // printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);
+  printf("lin_wind_x : %f ; lin_wind_y : %f ; lin_wind_z : %f ; \n",lin_wind_x,lin_wind_y,lin_wind_z);
+  printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);
 
   //Testing
-  custom_wind_lin_vel_ = ignition::math::Vector3d(0,0,0);
-  custom_wind_ang_vel_ = ignition::math::Vector3d(0,0,0);
+  // custom_wind_lin_vel_ = ignition::math::Vector3d(0,0,0);
+  // custom_wind_ang_vel_ = ignition::math::Vector3d(0,0,0);
 
 
   //Publish wind speed
@@ -913,8 +921,9 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   //compensate for Gazebo axes direction definition
   //Y=-Y;Z=-Z;
   Y=-Y;Z=-Z;
-  // Convert body force to inertial frame
+
   ignition::math::Vector3 force=ignition::math::Vector3(X,Y,Z);
+  // Convert body force to inertial frame
   //ignition::math::Vector3 force=InvDCM.operator*(forceb);
 
   // Workout moments at centre of mass in body frame
