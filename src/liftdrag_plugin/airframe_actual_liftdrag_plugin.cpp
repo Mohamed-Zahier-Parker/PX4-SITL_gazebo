@@ -804,7 +804,7 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
 
   // Print wind
   // printf("lin_wind_x : %f ; lin_wind_y : %f ; lin_wind_z : %f ; \n",lin_wind_x,lin_wind_y,lin_wind_z);
-  // printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);\
+  // printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);
   // std::cout<<"Turb_lin_x: "<<y0u<<" ; Turb_lin_y: "<<y0v<<" ; Turb_lin_z: "<<y0w<<"\n";
 
   //Testing
