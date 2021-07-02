@@ -801,8 +801,8 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   double lin_wind_z=Gust_linear_inertial.Z()+Turb_force_inertial.Z()+Shear_linear_inertial.Z();
   custom_wind_lin_vel_=ignition::math::Vector3d(lin_wind_x,lin_wind_y,lin_wind_z);
   custom_wind_ang_vel_=Turb_moment_inertial;
-  printf("lin_wind_x : %f ; lin_wind_y : %f ; lin_wind_z : %f ; \n",lin_wind_x,lin_wind_y,lin_wind_z);
-  printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);
+  // printf("lin_wind_x : %f ; lin_wind_y : %f ; lin_wind_z : %f ; \n",lin_wind_x,lin_wind_y,lin_wind_z);
+  // printf("ang_wind_x : %f ; ang_wind_y : %f ; ang_wind_z : %f ; \n",y0p,y0q,y0r);
 
   //Testing
   // custom_wind_lin_vel_ = ignition::math::Vector3d(0,0,0);
