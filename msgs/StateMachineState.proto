@@ -1,0 +1,7 @@
+syntax = "proto2";
+package mp_msgs.msgs;
+
+message StateMachineState
+{
+  required int64   sm_state  = 1 ;
+}

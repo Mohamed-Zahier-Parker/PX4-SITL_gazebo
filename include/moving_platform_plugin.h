@@ -15,12 +15,18 @@
 #include "gazebo/msgs/msgs.hh"
 #include "Float.pb.h"
 #include "ActuatorDeflections.pb.h"
+#include "StateMachineState.pb.h"
+#include "MovingPlatform.pb.h"
 
 #include "common.h"
 
 namespace gazebo {
 
 typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+typedef const boost::shared_ptr<const mp_msgs::msgs::StateMachineState> StateMachineStatePtr;
+typedef const boost::shared_ptr<const mp_msgs::msgs::MovingPlatform> MovingPlatformPtr;
+
+static const std::string kDefaultMovingPlatformPubTopic = "/moving_platform";
 
 class GAZEBO_VISIBLE MovingPlatformPlugin : public ModelPlugin
 {
@@ -60,6 +66,8 @@ class GAZEBO_VISIBLE MovingPlatformPlugin : public ModelPlugin
     private: std::string uav_model_name;
     private: std::string act_def_sub_topic_;
 
+    private: bool start_initial_mp_movement=false,end_initial_mp_movement=false,start_state_mp_movement=false,end_state_mp_movement=false;
+
     private:
       double dA_defl_=0;
       double dE_defl_=0;
@@ -69,6 +77,15 @@ class GAZEBO_VISIBLE MovingPlatformPlugin : public ModelPlugin
       transport::SubscriberPtr act_def_sub_;
       void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
 
+    private:
+      int sm_state_out=0;
+      std::string sm_state_sub_topic_;
+      transport::SubscriberPtr sm_state_sub_;
+      void StateMachineStateCallback(StateMachineStatePtr &sm_msg);
+
+      std::string moving_platform_pub_topic_{kDefaultMovingPlatformPubTopic};
+      transport::PublisherPtr moving_platform_pub_;
+      int mp_pub_count=0;
 
 };
 }

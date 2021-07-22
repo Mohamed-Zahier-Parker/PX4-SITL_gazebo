@@ -1,0 +1,13 @@
+syntax = "proto2";
+package mp_msgs.msgs;
+import "vector3d.proto";
+
+message MovingPlatform
+{
+  required double mp_position_x = 1 ;
+  required double mp_position_y = 2 ;
+  required double mp_position_z = 3 ;
+  required double mp_velocity_x = 4 ;
+  required double mp_velocity_y = 5 ;
+  required double mp_velocity_z = 6 ;
+}

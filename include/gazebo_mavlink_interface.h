@@ -70,6 +70,11 @@
 #include <Pressure.pb.h>
 #include <Wind.pb.h>
 #include <ActuatorDeflections.pb.h>
+#include "StateMachineState.pb.h"
+#include "MovingPlatform.pb.h"
+#include <algorithm>
+#include <iostream>
+
 
 #include <mavlink/v2.0/common/mavlink.h>
 #include "msgbuffer.h"
@@ -111,6 +116,10 @@ typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
 //Actuator deflection message pointer
 typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
 
+// Moving Platform message pointer
+typedef const boost::shared_ptr<const mp_msgs::msgs::StateMachineState> StateMachineStatePtr;
+typedef const boost::shared_ptr<const mp_msgs::msgs::MovingPlatform> MovingPlatformPtr;
+
 typedef std::pair<const int, const ignition::math::Quaterniond> SensorIdRot_P;
 typedef std::map<transport::SubscriberPtr, SensorIdRot_P > Sensor_M;
 
@@ -131,6 +140,8 @@ static const std::string kDefaultBarometerTopic = "/baro";
 static const std::string kDefaultWindTopic = "/world_wind";
 
 static const std::string kDefaultActuatorControlPubTopic = "/actuator_deflections";
+static const std::string kDefaultStateMachineStatePubTopic = "/state_machine_state";
+
 
 //! Rx packer framing status. (same as @p mavlink::mavlink_framing_t)
 enum class Framing : uint8_t {
@@ -255,11 +266,18 @@ private:
   // Actuator Deflection Topic
   std::string actuator_deflection_pub_topic_{kDefaultActuatorControlPubTopic};
 
+  // Moving platform Topics
+  std::string sm_state_pub_topic_{kDefaultStateMachineStatePubTopic};
+  std::string moving_platform_sub_topic_;
+
   transport::NodePtr node_handle_;
   transport::PublisherPtr motor_velocity_reference_pub_;
   transport::SubscriberPtr mav_control_sub_;
 
   transport::PublisherPtr actuator_deflection_pub_;
+
+  transport::PublisherPtr sm_state_pub_;
+  transport::SubscriberPtr moving_platform_sub_;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
@@ -315,6 +333,12 @@ private:
   void handle_control(double _dt);
   bool IsRunning();
   void onSigInt();
+
+  void MovingPlatformCallback(MovingPlatformPtr &mp_msg);
+  double mp_posx=0,mp_posy=0,mp_posz=0,mp_velx=0,mp_vely=0,mp_velz=0;
+  void SendMovingPlatformMessages();
+  void handle_sm_state(mavlink_message_t *msg);
+  int dispcount=0;
 
   /**
    * @brief Set the MAV_SENSOR_ORIENTATION enum value based on the sensor orientation

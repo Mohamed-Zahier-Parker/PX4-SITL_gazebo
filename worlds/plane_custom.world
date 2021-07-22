@@ -7,10 +7,10 @@
     </include>
     <!-- A ground plane -->
     <include>
-      <uri>model://ground_plane</uri>
+      <uri>model://ground_plane_custom</uri>
     </include>
     <include>
-      <uri>model://asphalt_plane</uri>
+      <uri>model://asphalt_plane_custom</uri>
     </include>
     <include>
       <uri>model://landing_platform</uri>

@@ -86,8 +86,12 @@ GZ_ASSERT(_model, "MovingPlatformPlugin _model pointer is NULL");
   act_def_sub_topic_="/actuator_deflections";
   act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + uav_model_name + act_def_sub_topic_, &MovingPlatformPlugin::ActuatorDeflectionCallback, this);
 
+  //Subscribe to state machine state topic
+  sm_state_sub_topic_="/state_machine_state";
+  sm_state_sub_ = node_handle_->Subscribe<mp_msgs::msgs::StateMachineState>("~/" + sm_state_sub_topic_, &MovingPlatformPlugin::StateMachineStateCallback, this);
 
-
+  //Advertise publishing to moving platform topic
+  moving_platform_pub_= node_handle_->Advertise<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_pub_topic_, 1);
 }
 
 /////////////////////////////////////////////////
@@ -99,7 +103,7 @@ void MovingPlatformPlugin::OnUpdate()
 
   dT_defl_=dT_defl_/3500.00*40.00;
 
-//   std::cout<<"Thrust value : "<<dT_defl_<<"\n";
+  // std::cout<<"Thrust value : "<<dT_defl_<<"\n";
 
   //Get platform position
     // pose of body
@@ -109,24 +113,71 @@ void MovingPlatformPlugin::OnUpdate()
   ignition::math::Pose3d pose = ignitionFromGazeboMath(this->link->GetWorldPose());
 #endif
 
+  // Get platform velocity
+  ignition::math::Vector3d vel = this->link->WorldLinearVel();
 
-   int state = 0;//For testing
+
+  //  int sm_state_out = 0;//For testing
 
   //Platform velocities
-  ignition::math::Vector3 mp_initial_velocity=ignition::math::Vector3(1.00,0.00,0.00);
-  ignition::math::Vector3 mp_normal_velocity=ignition::math::Vector3(10.00,0.00,0.00);
-  ignition::math::Vector3 mp_return_velocity=ignition::math::Vector3(-10.00,0.00,0.00);
+  ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(1.00,0.00,0.00);
+  ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(10.00,0.00,0.00);
+  ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(-10.00,0.00,0.00);
 
-  if(dT_defl_ > 0 && pose.X()<=-0.1 && state==0){ //move to start position
-	  this->link->SetLinearVel(mp_initial_velocity);
-  }else if(state>=1){
-	  this->link->SetLinearVel(mp_normal_velocity);
-  }else if(state==0 && pose.X()>0){
-	  this->link->SetLinearVel(mp_return_velocity);
-  }else{
-	  this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
+  //move to start position
+  if(dT_defl_ > 0.00 && pose.X()<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
+    start_initial_mp_movement=true;
+    std::cout<<"Move platform to start position\n";
+    this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
+  }else if(start_initial_mp_movement && pose.X()<0.0){
+    this->link->SetLinearVel(mp_initial_velocity);
+  }else if(start_initial_mp_movement && pose.X()>=0.0)
+  {
+    this->link->SetLinearVel({0, 0, 0});
+    start_initial_mp_movement=false;
+    end_initial_mp_movement=true;
   }
 
+  // Move platform for FW UAV landing
+  if(end_initial_mp_movement){
+    if(sm_state_out==0 && pose.X()>0.1 && !end_state_mp_movement){ //Check Abort case
+      this->link->SetLinearVel(mp_return_velocity);
+      start_state_mp_movement=false;
+    }else if(sm_state_out>=1 && !start_state_mp_movement && !end_state_mp_movement){
+      start_state_mp_movement=true;
+      std::cout<<"Landing platform moving\n";
+      this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
+    }else if(start_state_mp_movement && sm_state_out!=6 && !end_state_mp_movement){
+	    this->link->SetLinearVel(mp_normal_velocity);
+    }else if(sm_state_out==6 && !end_state_mp_movement && !start_state_mp_movement){
+      this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
+      end_state_mp_movement=true;
+    }else{
+	    this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
+    }
+  }
+
+  //Prepare data to be published (Convert to NED frame from ENU)
+  ignition::math::Vector3d mp_pose_pub=ignition::math::Vector3d(pose.Y(),pose.X(),-(pose.Z()+0.05)); // 0.05 added due to platform being placed 0.05m above ground
+  ignition::math::Vector3d mp_vel_pub=ignition::math::Vector3d(vel.Y(),vel.X(),-vel.Z());
+
+  // mp_pose_pub=gazebo::msgs::Convert(mp_pose_pub);
+  // mp_vel_pub=gazebo::msgs::Convert(mp_vel_pub);
+
+  // Publish moving platform stats to topic
+  mp_msgs::msgs::MovingPlatform mp_stats_msg;
+
+  mp_stats_msg.set_mp_position_x(mp_pose_pub.X());
+  mp_stats_msg.set_mp_position_y(mp_pose_pub.Y());
+  mp_stats_msg.set_mp_position_z(mp_pose_pub.Z());
+  mp_stats_msg.set_mp_velocity_x(mp_vel_pub.X());
+  mp_stats_msg.set_mp_velocity_y(mp_vel_pub.Y());
+  mp_stats_msg.set_mp_velocity_z(mp_vel_pub.Z());
+
+  if(mp_pub_count%50==0){ //Temporary fix for too fast publishing
+    moving_platform_pub_->Publish(mp_stats_msg);
+  }
+  mp_pub_count++;
 }
 
 void MovingPlatformPlugin::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
@@ -135,4 +186,9 @@ void MovingPlatformPlugin::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &de
   dF_defl_=deflections->df();
   dR_defl_=deflections->dr();
   dT_defl_=deflections->dt();
+  // std::cout<<"Running actuator deflections dT = "<<dT_defl_<<"\n";
+}
+
+void MovingPlatformPlugin::StateMachineStateCallback(StateMachineStatePtr &sm_msg){
+  sm_state_out=sm_msg->sm_state();
 }

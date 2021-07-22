@@ -376,6 +376,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Publish actuator deflection messages
   actuator_deflection_pub_ = node_handle_->Advertise<act_msgs::msgs::ActuatorDeflections>("~/" + model_->GetName() + actuator_deflection_pub_topic_, 1);
 
+  // Moving Platform
+  sm_state_pub_= node_handle_->Advertise<mp_msgs::msgs::StateMachineState>("~/" + sm_state_pub_topic_, 1);
+  moving_platform_sub_topic_ = "/moving_platform";
+  moving_platform_sub_ = node_handle_->Subscribe<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_sub_topic_, &GazeboMavlinkInterface::MovingPlatformCallback, this);
 
 #if GAZEBO_MAJOR_VERSION >= 9
   last_time_ = world_->SimTime();
@@ -680,6 +684,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   // Send groudntruth at full rate
   SendGroundTruth();
 
+  // Send moving platform data
+  SendMovingPlatformMessages();
+
   if (close_conn_) { // close connection if required
     close();
   }
@@ -831,6 +838,47 @@ void GazeboMavlinkInterface::forward_mavlink_message(const mavlink_message_t *me
     {
       gzerr << "Failed sending mavlink message to SDK: " << strerror(errno) << "\n";
     }
+  }
+}
+
+void GazeboMavlinkInterface::MovingPlatformCallback(MovingPlatformPtr &mp_msg){
+  mp_posx=mp_msg->mp_position_x();
+  mp_posy=mp_msg->mp_position_y();
+  mp_posz=mp_msg->mp_position_z();
+  mp_velx=mp_msg->mp_velocity_x();
+  mp_vely=mp_msg->mp_velocity_y();
+  mp_velz=mp_msg->mp_velocity_z();
+  // if(dispcount%100==0){
+  //   std::cout<<"Gazebo Posx : "<<mp_posx<<"\n";
+  // }
+  // dispcount++;
+}
+
+void GazeboMavlinkInterface::SendMovingPlatformMessages()
+{
+
+  mavlink_mp_specs_t mp_send_msg;
+#if GAZEBO_MAJOR_VERSION >= 9
+  mp_send_msg.time_usec = world_->SimTime().Double() * 1e6;
+#else
+  mp_send_msg.time_usec = world_->GetSimTime().Double() * 1e6;
+#endif
+  mp_send_msg.mp_position[0] = (float)mp_posx;
+  mp_send_msg.mp_position[1] = (float)mp_posy;
+  mp_send_msg.mp_position[2] = (float)mp_posz;
+  mp_send_msg.mp_velocity[0] = (float)mp_velx;
+  mp_send_msg.mp_velocity[1] = (float)mp_vely;
+  mp_send_msg.mp_velocity[2] = (float)mp_velz;
+
+  // if(dispcount%100==0){
+  //   std::cout<<"Gazebo Posx : "<<mp_send_msg.mp_position[0]<<"\n";
+  // }
+  // dispcount++;
+
+  if (!hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+    mavlink_message_t msg;
+    mavlink_msg_mp_specs_encode_chan(1, 225, MAVLINK_COMM_0, &msg, &mp_send_msg);
+    send_mavlink_message(&msg);
   }
 }
 
@@ -1475,6 +1523,7 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg, bool &receiv
 {
   switch (msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
+    {
     mavlink_hil_actuator_controls_t controls;
     mavlink_msg_hil_actuator_controls_decode(msg, &controls);
 
@@ -1504,7 +1553,25 @@ void GazeboMavlinkInterface::handle_message(mavlink_message_t *msg, bool &receiv
     received_actuator = true;
     received_first_actuator_ = true;
     break;
+    }
+  case MAVLINK_MSG_ID_SM_STATE:
+    {
+    handle_sm_state(msg);
+    break;
+    }
+  default:
+    break;
   }
+}
+
+void GazeboMavlinkInterface::handle_sm_state(mavlink_message_t *msg){
+  mavlink_sm_state_t sm_state_receive;
+  mavlink_msg_sm_state_decode(msg, &sm_state_receive);
+
+  mp_msgs::msgs::StateMachineState sm_state_msg;
+  sm_state_msg.set_sm_state(sm_state_receive.state);
+
+  sm_state_pub_->Publish(sm_state_msg);
 }
 
 void GazeboMavlinkInterface::handle_control(double _dt)
