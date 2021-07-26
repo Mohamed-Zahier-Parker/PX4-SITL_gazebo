@@ -97,7 +97,7 @@ GZ_ASSERT(_model, "MovingPlatformPlugin _model pointer is NULL");
 /////////////////////////////////////////////////
 void MovingPlatformPlugin::OnUpdate()
 {
-
+double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo origin
 //   std::cout<<"Running MovingPlatfromPlugin\n";
   GZ_ASSERT(this->link, "Link was NULL");
 
@@ -120,18 +120,18 @@ void MovingPlatformPlugin::OnUpdate()
   //  int sm_state_out = 0;//For testing
 
   //Platform velocities
-  ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(1.00,0.00,0.00);
-  ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(10.00,0.00,0.00);
-  ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(-10.00,0.00,0.00);
+  ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(1.00,0.00,0.00);// Velocity to reach starting point
+  ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(10.00,0.00,0.00);// Velocity to move with
+  ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(-10.00,0.00,0.00);// Velocity to return to starting point
 
   //move to start position
-  if(dT_defl_ > 0.00 && pose.X()<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
+  if(dT_defl_ > 0.00 && (pose.X()-offset_plat[0])<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
     start_initial_mp_movement=true;
     std::cout<<"Move platform to start position\n";
     this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
-  }else if(start_initial_mp_movement && pose.X()<0.0){
+  }else if(start_initial_mp_movement && (pose.X()-offset_plat[0])<0.0){
     this->link->SetLinearVel(mp_initial_velocity);
-  }else if(start_initial_mp_movement && pose.X()>=0.0)
+  }else if(start_initial_mp_movement && (pose.X()-offset_plat[0])>=0.0)
   {
     this->link->SetLinearVel({0, 0, 0});
     start_initial_mp_movement=false;
@@ -140,7 +140,7 @@ void MovingPlatformPlugin::OnUpdate()
 
   // Move platform for FW UAV landing
   if(end_initial_mp_movement){
-    if(sm_state_out==0 && pose.X()>0.1 && !end_state_mp_movement){ //Check Abort case
+    if(sm_state_out==0 && (pose.X()-offset_plat[0])>0.1 && !end_state_mp_movement){ //Check Abort case
       this->link->SetLinearVel(mp_return_velocity);
       start_state_mp_movement=false;
     }else if(sm_state_out>=1 && !start_state_mp_movement && !end_state_mp_movement){
@@ -152,13 +152,14 @@ void MovingPlatformPlugin::OnUpdate()
     }else if(sm_state_out==6 && !end_state_mp_movement && !start_state_mp_movement){
       this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
       end_state_mp_movement=true;
+      std::cout<<"Gazebo_comp_mp_x : "<<pose.Y()<<" Gazebo_comp_mp_y : "<<pose.X()<<" Gazebo_comp_mp_z : "<<(-pose.Z()-0.05)<<"\n";
     }else{
 	    this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
     }
   }
 
   //Prepare data to be published (Convert to NED frame from ENU)
-  ignition::math::Vector3d mp_pose_pub=ignition::math::Vector3d(pose.Y(),pose.X(),-(pose.Z()+0.05)); // 0.05 added due to platform being placed 0.05m above ground
+  ignition::math::Vector3d mp_pose_pub=ignition::math::Vector3d((pose.Y()-offset_plat[1]),(pose.X()-offset_plat[0]),-(pose.Z()+0.05)); // 0.05 added due to platform being placed 0.05m above ground
   ignition::math::Vector3d mp_vel_pub=ignition::math::Vector3d(vel.Y(),vel.X(),-vel.Z());
 
   // mp_pose_pub=gazebo::msgs::Convert(mp_pose_pub);

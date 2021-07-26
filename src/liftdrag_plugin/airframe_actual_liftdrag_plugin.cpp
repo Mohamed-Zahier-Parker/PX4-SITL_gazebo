@@ -192,6 +192,10 @@ void AirframeActualLiftDragPlugin::Load(physics::ModelPtr _model,
   act_def_sub_topic_="/actuator_deflections";
   act_def_sub_ = node_handle_->Subscribe<act_msgs::msgs::ActuatorDeflections>("~/" + model->GetName() + act_def_sub_topic_, &AirframeActualLiftDragPlugin::ActuatorDeflectionCallback, this);
 
+  //Subscribe to state machine state topic
+  sm_state_sub_topic_="/state_machine_state";
+  sm_state_sub_ = node_handle_->Subscribe<mp_msgs::msgs::StateMachineState>("~/" + sm_state_sub_topic_, &AirframeActualLiftDragPlugin::StateMachineStateCallback, this);
+
   //Subscribe to world stats topic
   world_stats_sub_ = node_handle_->Subscribe("~/" + world_stats_sub_topic_, &AirframeActualLiftDragPlugin::WorldStatsCallback, this);
 
@@ -987,6 +991,13 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   this->link->AddRelativeForce(force);
   this->link->AddRelativeTorque(moment);
 
+  // Testing landing postion of fw uav
+  if(sm_state_out==6 && !disp_fw_gazebo_loc){
+    disp_fw_gazebo_loc=true;
+    double fw_gaz_loc[3]={(pose.X()),(pose.Y()),(pose.Z())};
+    std::cout<<"Gazebo_comp_fw_x : "<<fw_gaz_loc[1]<<" Gazebo_comp_fw_y : "<<fw_gaz_loc[0]<<" Gazebo_comp_fw_z : "<<-fw_gaz_loc[2]<<"\n";
+  }
+
 }
 
 // void AirframeActualLiftDragPlugin::WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg) {
@@ -1006,4 +1017,8 @@ void AirframeActualLiftDragPlugin::ActuatorDeflectionCallback(ActuatorDeflection
 void AirframeActualLiftDragPlugin::WorldStatsCallback(ConstWorldStatisticsPtr &_msg){
   sim_time_=_msg->sim_time();
 
+}
+
+void AirframeActualLiftDragPlugin::StateMachineStateCallback(StateMachineStatePtr &sm_msg){
+  sm_state_out=sm_msg->sm_state();
 }

@@ -34,12 +34,14 @@
 #include <string>
 #include <map>
 #include <cmath>
+#include "StateMachineState.pb.h"
 
 #include "Wind.pb.h"
 
 namespace gazebo
 {
   typedef const boost::shared_ptr<const act_msgs::msgs::ActuatorDeflections> ActuatorDeflectionsPtr;
+  typedef const boost::shared_ptr<const mp_msgs::msgs::StateMachineState> StateMachineStatePtr;
   /// \brief A plugin that simulates lift and drag.
   class GAZEBO_VISIBLE AirframeActualLiftDragPlugin : public ModelPlugin
   {
@@ -274,6 +276,13 @@ namespace gazebo
       double dT_defl_;
       transport::SubscriberPtr act_def_sub_;
       void ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections);
+
+    private:
+      int sm_state_out=0;
+      std::string sm_state_sub_topic_;
+      transport::SubscriberPtr sm_state_sub_;
+      void StateMachineStateCallback(StateMachineStatePtr &sm_msg);
+      bool disp_fw_gazebo_loc=false;
 
     private: ignition::math::Vector3d wind_vel_=ignition::math::Vector3d(0,0,0);
     private: double now=0;
