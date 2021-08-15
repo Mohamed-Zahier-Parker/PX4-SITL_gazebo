@@ -998,6 +998,12 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
     std::cout<<"Gazebo_comp_fw_x : "<<fw_gaz_loc[1]<<" Gazebo_comp_fw_y : "<<fw_gaz_loc[0]<<" Gazebo_comp_fw_z : "<<-fw_gaz_loc[2]<<"\n";
   }
 
+  // std::cout<<"Gazebo_comp_fw_x : "<<pose.Y()<<" Gazebo_comp_fw_y : "<<pose.X()<<" Gazebo_comp_fw_z : "<<-pose.Z()<<"\n";
+  // if(disp_count%5==0){
+  //   std::cout<<"Gazebo_comp_fw_x : "<<pose.Y()<<" Gazebo_comp_fw_y : "<<pose.X()<<" Gazebo_comp_fw_z : "<<-pose.Z()<<"\n";
+  // }
+
+  disp_count++;
 }
 
 // void AirframeActualLiftDragPlugin::WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg) {

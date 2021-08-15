@@ -378,8 +378,10 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
 
   // Moving Platform
   sm_state_pub_= node_handle_->Advertise<mp_msgs::msgs::StateMachineState>("~/" + sm_state_pub_topic_, 1);
-  moving_platform_sub_topic_ = "/moving_platform";
-  moving_platform_sub_ = node_handle_->Subscribe<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_sub_topic_, &GazeboMavlinkInterface::MovingPlatformCallback, this);
+  // moving_platform_sub_topic_ = "/moving_platform";
+  // moving_platform_sub_ = node_handle_->Subscribe<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_sub_topic_, &GazeboMavlinkInterface::MovingPlatformCallback, this);
+  this->mp_model_ = world_->ModelByName(moving_platform_name);
+  this->mp_link = this->mp_model_->GetLink(moving_platform_link_name);
 
 #if GAZEBO_MAJOR_VERSION >= 9
   last_time_ = world_->SimTime();
@@ -684,6 +686,9 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   // Send groudntruth at full rate
   SendGroundTruth();
 
+  // Get moving platform data
+  MovingPlatformData();
+
   // Send moving platform data
   SendMovingPlatformMessages();
 
@@ -841,17 +846,35 @@ void GazeboMavlinkInterface::forward_mavlink_message(const mavlink_message_t *me
   }
 }
 
-void GazeboMavlinkInterface::MovingPlatformCallback(MovingPlatformPtr &mp_msg){
-  mp_posx=mp_msg->mp_position_x();
-  mp_posy=mp_msg->mp_position_y();
-  mp_posz=mp_msg->mp_position_z();
-  mp_velx=mp_msg->mp_velocity_x();
-  mp_vely=mp_msg->mp_velocity_y();
-  mp_velz=mp_msg->mp_velocity_z();
-  // if(dispcount%100==0){
-  //   std::cout<<"Gazebo Posx : "<<mp_posx<<"\n";
-  // }
-  // dispcount++;
+// void GazeboMavlinkInterface::MovingPlatformCallback(MovingPlatformPtr &mp_msg){
+//   mp_posx=mp_msg->mp_position_x();
+//   mp_posy=mp_msg->mp_position_y();
+//   mp_posz=mp_msg->mp_position_z();
+//   mp_velx=mp_msg->mp_velocity_x();
+//   mp_vely=mp_msg->mp_velocity_y();
+//   mp_velz=mp_msg->mp_velocity_z();
+//   // if(dispcount%100==0){
+//   //   std::cout<<"Gazebo Posx : "<<mp_posx<<"\n";
+//   // }
+//   // dispcount++;
+// }
+
+void GazeboMavlinkInterface::MovingPlatformData(){
+  //Get platform position
+  // pose of body
+  #if GAZEBO_MAJOR_VERSION >= 9
+    ignition::math::Pose3d mp_pose = this->mp_link->WorldPose();
+  #else
+    ignition::math::Pose3d mp_pose = ignitionFromGazeboMath(this->mp_link->GetWorldPose());
+  #endif
+
+  // Get platform velocity
+  ignition::math::Vector3d mp_vel = this->mp_link->WorldLinearVel();
+
+  // Apply PX4 NED conversion
+  mp_pose_px4=ignition::math::Vector3d((mp_pose.Y()-offset_plat[1]),(mp_pose.X()-offset_plat[0]),-(mp_pose.Z()+0.176-offset_plat[2])); // 0.05 added due to platform being placed 0.05m above ground
+  mp_vel_px4=ignition::math::Vector3d(mp_vel.Y(),mp_vel.X(),-mp_vel.Z());
+
 }
 
 void GazeboMavlinkInterface::SendMovingPlatformMessages()
@@ -863,15 +886,15 @@ void GazeboMavlinkInterface::SendMovingPlatformMessages()
 #else
   mp_send_msg.time_usec = world_->GetSimTime().Double() * 1e6;
 #endif
-  mp_send_msg.mp_position[0] = (float)mp_posx;
-  mp_send_msg.mp_position[1] = (float)mp_posy;
-  mp_send_msg.mp_position[2] = (float)mp_posz;
-  mp_send_msg.mp_velocity[0] = (float)mp_velx;
-  mp_send_msg.mp_velocity[1] = (float)mp_vely;
-  mp_send_msg.mp_velocity[2] = (float)mp_velz;
+  mp_send_msg.mp_position[0] = (float)mp_pose_px4.X();
+  mp_send_msg.mp_position[1] = (float)mp_pose_px4.Y();
+  mp_send_msg.mp_position[2] = (float)mp_pose_px4.Z();
+  mp_send_msg.mp_velocity[0] = (float)mp_vel_px4.X();
+  mp_send_msg.mp_velocity[1] = (float)mp_vel_px4.Y();
+  mp_send_msg.mp_velocity[2] = (float)mp_vel_px4.Z();
 
   // if(dispcount%100==0){
-  //   std::cout<<"Gazebo Posx : "<<mp_send_msg.mp_position[0]<<"\n";
+  //   std::cout<<"Gazebo Posy : "<<mp_send_msg.mp_position[1]<<"\n";
   // }
   // dispcount++;
 
@@ -1034,6 +1057,9 @@ void GazeboMavlinkInterface::SendGroundTruth()
   hil_state_quat.lat = groundtruth_lat_rad * 180 / M_PI * 1e7;
   hil_state_quat.lon = groundtruth_lon_rad * 180 / M_PI * 1e7;
   hil_state_quat.alt = groundtruth_altitude * 1000;
+
+  // !!! TESTING !!!
+  // std::cout<<"GT_Lon: "<<hil_state_quat.lon<<"\n";
 
   hil_state_quat.vx = vel_n.X() * 100;
   hil_state_quat.vy = vel_n.Y() * 100;

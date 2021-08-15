@@ -278,6 +278,10 @@ private:
 
   transport::PublisherPtr sm_state_pub_;
   transport::SubscriberPtr moving_platform_sub_;
+  std::string moving_platform_name = "landing_platform";
+  physics::ModelPtr mp_model_;
+  std::string moving_platform_link_name = "link";
+  physics::LinkPtr mp_link;
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
@@ -334,11 +338,15 @@ private:
   bool IsRunning();
   void onSigInt();
 
-  void MovingPlatformCallback(MovingPlatformPtr &mp_msg);
+  // void MovingPlatformCallback(MovingPlatformPtr &mp_msg);
   double mp_posx=0,mp_posy=0,mp_posz=0,mp_velx=0,mp_vely=0,mp_velz=0;
   void SendMovingPlatformMessages();
   void handle_sm_state(mavlink_message_t *msg);
   int dispcount=0;
+  double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo origin
+  ignition::math::Vector3d mp_pose_px4 = ignition::math::Vector3d(0.0,0.0,0.0);
+  ignition::math::Vector3d mp_vel_px4 = ignition::math::Vector3d(0.0,0.0,0.0);
+  void MovingPlatformData();
 
   /**
    * @brief Set the MAV_SENSOR_ORIENTATION enum value based on the sensor orientation

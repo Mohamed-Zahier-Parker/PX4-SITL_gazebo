@@ -91,12 +91,13 @@ GZ_ASSERT(_model, "MovingPlatformPlugin _model pointer is NULL");
   sm_state_sub_ = node_handle_->Subscribe<mp_msgs::msgs::StateMachineState>("~/" + sm_state_sub_topic_, &MovingPlatformPlugin::StateMachineStateCallback, this);
 
   //Advertise publishing to moving platform topic
-  moving_platform_pub_= node_handle_->Advertise<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_pub_topic_, 1);
+  // moving_platform_pub_= node_handle_->Advertise<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_pub_topic_, 1);
 }
 
 /////////////////////////////////////////////////
 void MovingPlatformPlugin::OnUpdate()
 {
+// double offset_plat[3]={1.01,0.98,0.0};//offset of uav spawn point with gazebo origin
 double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo origin
 //   std::cout<<"Running MovingPlatfromPlugin\n";
   GZ_ASSERT(this->link, "Link was NULL");
@@ -149,36 +150,36 @@ double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo orig
       this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
     }else if(start_state_mp_movement && sm_state_out!=6 && !end_state_mp_movement){
 	    this->link->SetLinearVel(mp_normal_velocity);
-    }else if(sm_state_out==6 && !end_state_mp_movement && !start_state_mp_movement){
+    }else if(sm_state_out==6 && !end_state_mp_movement && start_state_mp_movement){
       this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
       end_state_mp_movement=true;
-      std::cout<<"Gazebo_comp_mp_x : "<<pose.Y()<<" Gazebo_comp_mp_y : "<<pose.X()<<" Gazebo_comp_mp_z : "<<(-pose.Z()-0.05)<<"\n";
+      std::cout<<"Gazebo_comp_mp_x : "<<(pose.Y()-offset_plat[1])<<" Gazebo_comp_mp_y : "<<(pose.X()-offset_plat[0])<<" Gazebo_comp_mp_z : "<<(-(pose.Z()+0.176-offset_plat[2]))<<"\n";
+      //Testing pausing simulation
+      // this->world->SetPaused(true);
     }else{
 	    this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
     }
   }
 
-  //Prepare data to be published (Convert to NED frame from ENU)
-  ignition::math::Vector3d mp_pose_pub=ignition::math::Vector3d((pose.Y()-offset_plat[1]),(pose.X()-offset_plat[0]),-(pose.Z()+0.05)); // 0.05 added due to platform being placed 0.05m above ground
-  ignition::math::Vector3d mp_vel_pub=ignition::math::Vector3d(vel.Y(),vel.X(),-vel.Z());
+  // //Prepare data to be published (Convert to NED frame from ENU)
+  // ignition::math::Vector3d mp_pose_pub=ignition::math::Vector3d((pose.Y()-offset_plat[1]),(pose.X()-offset_plat[0]),-(pose.Z()+0.176-offset_plat[2])); // 0.05 added due to platform being placed 0.05m above ground
+  // ignition::math::Vector3d mp_vel_pub=ignition::math::Vector3d(vel.Y(),vel.X(),-vel.Z());
 
-  // mp_pose_pub=gazebo::msgs::Convert(mp_pose_pub);
-  // mp_vel_pub=gazebo::msgs::Convert(mp_vel_pub);
+  // // Publish moving platform stats to topic
+  // mp_msgs::msgs::MovingPlatform mp_stats_msg;
 
-  // Publish moving platform stats to topic
-  mp_msgs::msgs::MovingPlatform mp_stats_msg;
+  // mp_stats_msg.set_mp_position_x(mp_pose_pub.X());
+  // mp_stats_msg.set_mp_position_y(mp_pose_pub.Y());
+  // mp_stats_msg.set_mp_position_z(mp_pose_pub.Z());
+  // mp_stats_msg.set_mp_velocity_x(mp_vel_pub.X());
+  // mp_stats_msg.set_mp_velocity_y(mp_vel_pub.Y());
+  // mp_stats_msg.set_mp_velocity_z(mp_vel_pub.Z());
 
-  mp_stats_msg.set_mp_position_x(mp_pose_pub.X());
-  mp_stats_msg.set_mp_position_y(mp_pose_pub.Y());
-  mp_stats_msg.set_mp_position_z(mp_pose_pub.Z());
-  mp_stats_msg.set_mp_velocity_x(mp_vel_pub.X());
-  mp_stats_msg.set_mp_velocity_y(mp_vel_pub.Y());
-  mp_stats_msg.set_mp_velocity_z(mp_vel_pub.Z());
+  // if(mp_pub_count%5==0){ //Temporary fix for too fast publishing
+  //   moving_platform_pub_->Publish(mp_stats_msg);
+  // }
+  // mp_pub_count++;
 
-  if(mp_pub_count%50==0){ //Temporary fix for too fast publishing
-    moving_platform_pub_->Publish(mp_stats_msg);
-  }
-  mp_pub_count++;
 }
 
 void MovingPlatformPlugin::ActuatorDeflectionCallback(ActuatorDeflectionsPtr &deflections) {
