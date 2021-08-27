@@ -872,7 +872,7 @@ void GazeboMavlinkInterface::MovingPlatformData(){
   ignition::math::Vector3d mp_vel = this->mp_link->WorldLinearVel();
 
   // Apply PX4 NED conversion
-  mp_pose_px4=ignition::math::Vector3d((mp_pose.Y()-offset_plat[1]),(mp_pose.X()-offset_plat[0]),-(mp_pose.Z()+0.176-offset_plat[2])); // 0.05 added due to platform being placed 0.05m above ground
+  mp_pose_px4=ignition::math::Vector3d((mp_pose.Y()-offset_plat[1]),(mp_pose.X()-offset_plat[0]),-(mp_pose.Z()+0.176*0-offset_plat[2])); // 0.05 added due to platform being placed 0.05m above ground
   mp_vel_px4=ignition::math::Vector3d(mp_vel.Y(),mp_vel.X(),-mp_vel.Z());
 
 }

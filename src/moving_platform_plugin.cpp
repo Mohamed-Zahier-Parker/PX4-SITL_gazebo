@@ -153,7 +153,7 @@ double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo orig
     }else if(sm_state_out==6 && !end_state_mp_movement && start_state_mp_movement){
       this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
       end_state_mp_movement=true;
-      std::cout<<"Gazebo_comp_mp_x : "<<(pose.Y()-offset_plat[1])<<" Gazebo_comp_mp_y : "<<(pose.X()-offset_plat[0])<<" Gazebo_comp_mp_z : "<<(-(pose.Z()+0.176-offset_plat[2]))<<"\n";
+      std::cout<<"Gazebo_comp_mp_x : "<<(pose.Y()-offset_plat[1])<<" Gazebo_comp_mp_y : "<<(pose.X()-offset_plat[0])<<" Gazebo_comp_mp_z : "<<(-(pose.Z()+0.176*0-offset_plat[2]))<<"\n";
       //Testing pausing simulation
       // this->world->SetPaused(true);
     }else{
