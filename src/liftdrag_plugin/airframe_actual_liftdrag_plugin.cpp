@@ -891,7 +891,20 @@ if(T>=1/pub_rate){ //only update wind when timestep time passed
   //this->beta=0;
 
   C_L = this->C_L_0 + this->C_L_alpha*this->alpha+cbar/(2*total_speed)*this->C_L_Q*Q+this->C_L_dE*dE+this->C_L_dF*dF;//figure out how to get wb(P,Q,R)
-  C_D=this->C_D_0+((C_L)*(C_L))/(M_PI*this->A*this->e);
+  // C_D=this->C_D_0+((C_L)*(C_L))/(M_PI*this->A*this->e);
+
+  // Ground effect implementation
+  double G_L;
+  double G_D;
+  G_L= 1.0 +(0.00211-0.0003*(this->A - 3.0))*exp(5.2*(1-(pose.Z()/this->b))); // !!!Might have to change altitude to account for ground plane being shifted up!!!
+  if(pose.Z()<0.9*this->b){
+    G_D=1.111+5.55*(pose.Z()/this->b)-sqrt(29.8*pow(((pose.Z()/this->b) + 0.02),2)+0.817);
+  }else{
+    G_D=1.0;
+  }
+  C_L=G_L*C_L;
+  C_D=this->C_D_0 + G_D * (((C_L)*(C_L))/(M_PI*this->A*this->e));
+
   C_y=this->C_y_beta*this->beta+this->b/(2*total_speed)*this->C_y_P*Ps+this->b/(2*total_speed)*this->C_y_R*Rs+this->C_y_dA*dA+this->C_y_dR*dR;//figure out how to get wb(P,Q,R) and beta
   C_l=this->C_l_beta*this->beta+this->b/(2*total_speed)*this->C_l_P*Ps+this->b/(2*total_speed)*this->C_l_R*Rs+this->C_l_dA*dA+this->C_l_dR*dR;
   C_n=this->C_n_beta*this->beta+this->b/(2*total_speed)*this->C_n_P*Ps+this->b/(2*total_speed)*this->C_n_R*Rs+this->C_n_dA*dA+this->C_n_dR*dR;

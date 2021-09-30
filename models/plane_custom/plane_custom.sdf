@@ -560,12 +560,12 @@
       <C_m_dF>0.111822</C_m_dF>
       <V_20>2.7</V_20>
       <Vm>4</Vm>
-      <ts>100</ts>
+      <ts>70</ts>
       <dm>100</dm>
       <ds>400</ds>
-      <gust_direction>1 0 0</gust_direction>
+      <gust_direction>0 1 0</gust_direction>
       <V_20_shear>2.7</V_20_shear>
-      <shear_direction>0 1 0</shear_direction>
+      <shear_direction>1 0 0</shear_direction>
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
     </plugin>
