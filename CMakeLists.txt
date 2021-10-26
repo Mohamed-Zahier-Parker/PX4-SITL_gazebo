@@ -326,11 +326,24 @@ set(sensor_msgs
   msgs/Pressure.proto
   )
 
+#Actuator Control Message#
+set(act_msgs msgs/ActuatorDeflections.proto)
+
+#Moving Platform Message#
+set(mp_msgs
+  msgs/StateMachineState.proto
+  msgs/MovingPlatform.proto
+  )
+
 PROTOBUF_GENERATE_CPP(MAV_PROTO_SRCS MAV_PROTO_HDRS ${mav_msgs})
 PROTOBUF_GENERATE_CPP(NAV_PROTO_SRCS NAV_PROTO_HDRS ${nav_msgs})
 PROTOBUF_GENERATE_CPP(PHY_PROTO_SRCS PHY_PROTO_HDRS ${physics_msgs})
 PROTOBUF_GENERATE_CPP(STD_PROTO_SRCS STD_PROTO_HDRS ${std_msgs})
 PROTOBUF_GENERATE_CPP(SEN_PROTO_SRCS SEN_PROTO_HDRS ${sensor_msgs})
+
+PROTOBUF_GENERATE_CPP(ACT_PROTO_SRCS SEN_PROTO_HDRS ${act_msgs})
+
+PROTOBUF_GENERATE_CPP(MP_PROTO_SRCS MP_PROTO_HDRS ${mp_msgs})
 
 add_library(mav_msgs SHARED ${MAV_PROTO_SRCS})
 add_library(nav_msgs SHARED ${NAV_PROTO_SRCS})
@@ -338,12 +351,17 @@ add_library(physics_msgs SHARED ${PHY_PROTO_SRCS})
 add_library(std_msgs SHARED ${STD_PROTO_SRCS})
 add_library(sensor_msgs SHARED ${SEN_PROTO_SRCS})
 
+add_library(act_msgs SHARED ${ACT_PROTO_SRCS})
+add_library(mp_msgs SHARED ${MP_PROTO_SRCS})
+
 #---------#
 # Plugins #
 #---------#
 
 link_libraries(mav_msgs nav_msgs std_msgs sensor_msgs)
 link_libraries(physics_msgs)
+link_libraries(act_msgs)
+link_libraries(mp_msgs)
 
 add_library(gazebo_airspeed_plugin SHARED src/gazebo_airspeed_plugin.cpp)
 add_library(gazebo_camera_manager_plugin SHARED src/gazebo_camera_manager_plugin.cpp)
@@ -361,6 +379,7 @@ add_library(gazebo_gimbal_controller_plugin SHARED src/gazebo_gimbal_controller_
 add_library(gazebo_imu_plugin SHARED src/gazebo_imu_plugin.cpp)
 add_library(gazebo_mavlink_interface SHARED src/gazebo_mavlink_interface.cpp src/mavlink_interface.cpp)
 add_library(gazebo_motor_model SHARED src/gazebo_motor_model.cpp)
+add_library(custom_thrust SHARED src/custom_thrust.cpp)
 add_library(gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plugin.cpp)
 add_library(gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
 add_library(gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp src/geo_mag_declination.cpp)
@@ -370,6 +389,7 @@ add_library(gazebo_usv_dynamics_plugin SHARED src/gazebo_usv_dynamics_plugin.cpp
 add_library(gazebo_parachute_plugin SHARED src/gazebo_parachute_plugin.cpp)
 add_library(gazebo_airship_dynamics_plugin SHARED src/gazebo_airship_dynamics_plugin.cpp)
 add_library(gazebo_drop_plugin SHARED src/gazebo_drop_plugin.cpp)
+add_library(moving_platform_plugin SHARED src/moving_platform_plugin.cpp)
 
 set(plugins
   gazebo_airspeed_plugin
@@ -388,6 +408,7 @@ set(plugins
   gazebo_imu_plugin
   gazebo_mavlink_interface
   gazebo_motor_model
+  custom_thrust
   gazebo_multirotor_base_plugin
   gazebo_wind_plugin
   gazebo_magnetometer_plugin
@@ -397,6 +418,7 @@ set(plugins
   gazebo_parachute_plugin
   gazebo_airship_dynamics_plugin
   gazebo_drop_plugin
+  moving_platform_plugin
   )
 
 foreach(plugin ${plugins})
@@ -467,9 +489,16 @@ set(plugins
   list(APPEND plugins LiftDragPlugin)
 #endif()
 
+#if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
+  add_library(AirframeActualLiftDragPlugin SHARED src/liftdrag_plugin/airframe_actual_liftdrag_plugin.cpp)
+  list(APPEND plugins AirframeActualLiftDragPlugin)
+#endif()
+
 foreach(plugin ${plugins})
   add_dependencies(${plugin} mav_msgs nav_msgs std_msgs sensor_msgs)
   add_dependencies(${plugin} physics_msgs)
+  add_dependencies(${plugin} act_msgs)
+  add_dependencies(${plugin} mp_msgs)
 endforeach()
 
 # Configure the setup script
@@ -502,7 +531,8 @@ file(GLOB models_list LIST_DIRECTORIES true ${PROJECT_SOURCE_DIR}/models/*)
 file(REMOVE_RECURSE ${PROJECT_SOURCE_DIR}/worlds/.DS_Store)
 file(GLOB worlds_list LIST_DIRECTORIES true ${PROJECT_SOURCE_DIR}/worlds/*)
 
-install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs DESTINATION ${PLUGIN_PATH})
+# install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs DESTINATION ${PLUGIN_PATH})
+install(TARGETS ${plugins} mav_msgs nav_msgs std_msgs sensor_msgs act_msgs mp_msgs DESTINATION ${PLUGIN_PATH})
 install(DIRECTORY ${models_list} DESTINATION ${MODEL_PATH})
 install(FILES ${worlds_list} DESTINATION ${RESOURCE_PATH}/worlds)
 

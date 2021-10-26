@@ -336,7 +336,7 @@ void GpsPlugin::OnSensorUpdate()
 
   sensor_msgs::msgs::SITLGps gps_msg;
   // apply GPS delay
-  if ((current_time_ - last_gps_time_).Double() > 1 / parentSensor_->UpdateRate()) {
+  if ((current_time_ - last_gps_time_).Double() >= 1 / parentSensor_->UpdateRate()) {
     last_gps_time_ = current_time_;
 
     // do not sent empty msg

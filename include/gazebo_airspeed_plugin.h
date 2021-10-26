@@ -64,11 +64,14 @@
 
 #include <Airspeed.pb.h>
 #include <Wind.pb.h>
+#include <Pressure.pb.h>
+#include <string>
 
 namespace gazebo
 {
 
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Pressure> BarometerPtr;
 
 class GAZEBO_VISIBLE AirspeedPlugin : public SensorPlugin
 {
@@ -83,6 +86,7 @@ protected:
 
 private:
   void WindVelocityCallback(WindPtr& msg);
+  void BarometerCallback(BarometerPtr& baro_msg);
 
   physics::ModelPtr model_;
   physics::WorldPtr world_;
@@ -100,6 +104,9 @@ private:
   std::string link_name_;
   std::string model_name_;
   std::string airspeed_topic_;
+  std::string kDefaultBarometerTopic = "/baro";
+  std::string baro_sub_topic_{kDefaultBarometerTopic};
+  transport::SubscriberPtr baro_sub_;
 
   ignition::math::Vector3d wind_vel_;
   ignition::math::Vector3d vel_a_;

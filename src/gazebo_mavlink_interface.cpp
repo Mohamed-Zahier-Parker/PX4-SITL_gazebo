@@ -451,6 +451,21 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   // Publish gazebo's motor_speed message
   motor_velocity_reference_pub_ = node_handle_->Advertise<mav_msgs::msgs::CommandMotorSpeed>("~/" + model_->GetName() + motor_velocity_reference_pub_topic_, 1);
 
+  // Publish actuator deflection messages
+  actuator_deflection_pub_ = node_handle_->Advertise<act_msgs::msgs::ActuatorDeflections>("~/" + model_->GetName() + actuator_deflection_pub_topic_, 1);
+
+  // Moving Platform
+  sm_state_pub_= node_handle_->Advertise<mp_msgs::msgs::StateMachineState>("~/" + sm_state_pub_topic_, 1);
+  // moving_platform_sub_topic_ = "/moving_platform";
+  // moving_platform_sub_ = node_handle_->Subscribe<mp_msgs::msgs::MovingPlatform>("~/" + moving_platform_sub_topic_, &GazeboMavlinkInterface::MovingPlatformCallback, this);
+
+  if(world_->ModelByName(moving_platform_name)!= NULL){
+    this->mp_model_ = world_->ModelByName(moving_platform_name);
+    this->mp_link = this->mp_model_->GetLink(moving_platform_link_name);
+  }else{
+    // std::cout<<"No Moving Platform \n";
+  }
+
 #if GAZEBO_MAJOR_VERSION >= 9
   last_time_ = world_->SimTime();
   last_imu_time_ = world_->SimTime();
@@ -591,6 +606,18 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
   // Send groudntruth at full rate
   SendGroundTruth();
 
+  // Moving Platform
+  if(world_->ModelByName(moving_platform_name)!= NULL){
+    // Get moving platform data
+    MovingPlatformData();
+
+    // Send moving platform data
+    SendMovingPlatformMessages();
+
+    // Get the Staqte Machine State
+    handle_sm_state_pub();
+  }
+
   if (close_conn_) { // close connection if required
     mavlink_interface_->close();
   }
@@ -614,6 +641,17 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
 
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
+
+    //Actuator deflection publishing
+    act_msgs::msgs::ActuatorDeflections act_def_msg;
+
+    act_def_msg.set_da(input_reference_[6]);
+    act_def_msg.set_de(input_reference_[7]);
+    act_def_msg.set_df(input_reference_[3]);
+    act_def_msg.set_dr(input_reference_[2]);
+    act_def_msg.set_dt(input_reference_[4]);
+
+    actuator_deflection_pub_->Publish(act_def_msg);
   }
 
   last_time_ = current_time;
@@ -640,6 +678,52 @@ void GazeboMavlinkInterface::setMavlinkSensorOrientation(const ignition::math::V
     sensor_msg.orientation = MAV_SENSOR_ORIENTATION::MAV_SENSOR_ROTATION_CUSTOM;
   }
 
+}
+
+void GazeboMavlinkInterface::MovingPlatformData(){
+  //Get platform position
+  // pose of body
+  #if GAZEBO_MAJOR_VERSION >= 9
+    ignition::math::Pose3d mp_pose = this->mp_link->WorldPose();
+  #else
+    ignition::math::Pose3d mp_pose = ignitionFromGazeboMath(this->mp_link->GetWorldPose());
+  #endif
+
+  // Get platform velocity
+  ignition::math::Vector3d mp_vel = this->mp_link->WorldLinearVel();
+
+  // Apply PX4 NED conversion
+  mp_pose_px4=ignition::math::Vector3d((mp_pose.Y()-offset_plat[1]),(mp_pose.X()-offset_plat[0]),-(mp_pose.Z()+0.176*0-offset_plat[2])); // 0.05 added due to platform being placed 0.05m above ground
+  mp_vel_px4=ignition::math::Vector3d(mp_vel.Y(),mp_vel.X(),-mp_vel.Z());
+
+}
+
+void GazeboMavlinkInterface::SendMovingPlatformMessages()
+{
+
+  mavlink_mp_specs_t mp_send_msg;
+#if GAZEBO_MAJOR_VERSION >= 9
+  mp_send_msg.time_usec = world_->SimTime().Double() * 1e6;
+#else
+  mp_send_msg.time_usec = world_->GetSimTime().Double() * 1e6;
+#endif
+  mp_send_msg.mp_position[0] = (float)mp_pose_px4.X();
+  mp_send_msg.mp_position[1] = (float)mp_pose_px4.Y();
+  mp_send_msg.mp_position[2] = (float)mp_pose_px4.Z();
+  mp_send_msg.mp_velocity[0] = (float)mp_vel_px4.X();
+  mp_send_msg.mp_velocity[1] = (float)mp_vel_px4.Y();
+  mp_send_msg.mp_velocity[2] = (float)mp_vel_px4.Z();
+
+  // if(dispcount%100==0){
+  //   std::cout<<"Gazebo Posy : "<<mp_send_msg.mp_position[1]<<"\n";
+  // }
+  // dispcount++;
+
+  if (!hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+    mavlink_message_t msg;
+    mavlink_msg_mp_specs_encode_chan(1, 229, MAVLINK_COMM_0, &msg, &mp_send_msg);
+    mavlink_interface_->send_mavlink_message(&msg);
+  }
 }
 
 void GazeboMavlinkInterface::ImuCallback(ImuPtr& imu_message)
@@ -797,7 +881,6 @@ void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg, const int& id) {
   gps_data.cog = static_cast<uint16_t>(GetDegrees360(cog) * 100.0);
   gps_data.satellites_visible = 10;
   gps_data.id = id;
-
   mavlink_interface_->SendGpsMessages(gps_data);
 }
 
@@ -1121,6 +1204,13 @@ void GazeboMavlinkInterface::handle_actuator_controls() {
   }
   // std::cout << "Input Reference: " << input_reference_.transpose() << std::endl;
   received_first_actuator_ = mavlink_interface_->GetReceivedFirstActuator();
+}
+
+void GazeboMavlinkInterface::handle_sm_state_pub(){
+  mp_msgs::msgs::StateMachineState sm_state_msg;
+  sm_state_msg.set_sm_state(mavlink_interface_->GetSMState());
+
+  sm_state_pub_->Publish(sm_state_msg);
 }
 
 void GazeboMavlinkInterface::handle_control(double _dt)

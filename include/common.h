@@ -250,7 +250,8 @@ static constexpr const double kDefaultHomeLongitude = 8.545594 * M_PI / 180.0;  
 static constexpr const double kDefaultHomeAltitude = 488.0;                      // meters
 
 // Earth radius
-static constexpr const double earth_radius = 6353000.0;      // meters
+// static constexpr const double earth_radius = 6353000.0;      // meters
+static constexpr const double earth_radius = 6371000.0; //ECL/EKF radius of earth(mean)
 
 /**
  * @brief Get latitude and longitude coordinates from local position

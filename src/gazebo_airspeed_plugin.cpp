@@ -40,6 +40,7 @@
 
 #include <gazebo_airspeed_plugin.h>
 #include <boost/algorithm/string.hpp>
+#include <iostream>
 
 namespace gazebo {
 GZ_REGISTER_SENSOR_PLUGIN(AirspeedPlugin)
@@ -110,6 +111,7 @@ void AirspeedPlugin::Load(sensors::SensorPtr _parent, sdf::ElementPtr _sdf)
 
   airspeed_pub_ = node_handle_->Advertise<sensor_msgs::msgs::Airspeed>("~/" + model_name_ + "/link/" + airspeed_topic_, 10);
   wind_sub_ = node_handle_->Subscribe("~/world_wind", &AirspeedPlugin::WindVelocityCallback, this);
+  baro_sub_ = node_handle_->Subscribe("~/" + model_name_ + baro_sub_topic_, &AirspeedPlugin::BarometerCallback, this);
   getSdfParam<float>(_sdf, "DiffPressureStdev", diff_pressure_stddev_, diff_pressure_stddev_);
   getSdfParam<float>(_sdf, "Temperature", temperature_, temperature_);
 
@@ -150,6 +152,9 @@ void AirspeedPlugin::OnUpdate(const common::UpdateInfo&){
 }
 
 void AirspeedPlugin::OnSensorUpdate() {
+  //Testing temprature change
+  // temperature_=11.83;
+
   const float temperature_msl = 288.0f; // temperature at MSL (Kelvin)
   float temperature_local = temperature_ + 273.0f;
   const float density_ratio = powf((temperature_msl/temperature_local) , 4.256f);
@@ -163,6 +168,8 @@ void AirspeedPlugin::OnSensorUpdate() {
   airspeed_msg.set_time_usec(last_time_.Double() * 1e6);
   airspeed_msg.set_diff_pressure(diff_pressure);
   airspeed_pub_->Publish(airspeed_msg);
+
+  // std::cout<<"GazAirTemp: " <<temperature_<<"\n";
 }
 
 
@@ -171,4 +178,9 @@ void AirspeedPlugin::WindVelocityCallback(WindPtr& msg) {
             msg->velocity().y(),
             msg->velocity().z());
 }
+
+void AirspeedPlugin::BarometerCallback(BarometerPtr& baro_msg) {
+  temperature_ = baro_msg->temperature();
+}
+
 } // namespace gazebo

@@ -140,6 +140,12 @@ struct HILData {
     Eigen::Vector3d gyro_b;
 };
 
+struct MovingPlatformData {
+    uint64_t time_usec=0;
+    float mp_position[3];
+    float mp_velocity[3];
+};
+
 class MavlinkInterface {
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -160,6 +166,7 @@ public:
     void UpdateIMU(const SensorData::Imu &data, const int id = 0);
     void UpdateMag(const SensorData::Magnetometer &data, const int id = 0);
     Eigen::VectorXd GetActuatorControls();
+    int GetSMState();
     bool GetArmedState();
     void onSigInt();
     inline bool GetReceivedFirstActuator() {return received_first_actuator_;}
@@ -187,6 +194,9 @@ private:
     void handle_message(mavlink_message_t *msg);
     void acceptConnections();
     void RegisterNewHILSensorInstance(int id);
+
+    void handle_sm_state(mavlink_message_t *msg);
+    int sm_state=0;
 
     // Serial interface
     void open_serial();

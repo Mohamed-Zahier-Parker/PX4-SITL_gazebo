@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <sdf version="1.6">
-  <model name="airspeed">
+  <model name="airspeed_custom">
     <link name="link">
       <pose>0 0 0 0 0 0</pose>
       <inertial>
@@ -28,13 +28,12 @@
           </script>
         </material>
       </visual>
-      <sensor name="airspeed" type="gps">
+      <sensor name="airspeed_custom" type="gps">
         <pose>0 0 0 0 0 0</pose>
         <update_rate>5.0</update_rate>
         <always_on>true</always_on>
         <visualize>false</visualize>
         <plugin name='airspeed_plugin' filename='libgazebo_airspeed_plugin.so'>
-          <topic>airspeed</topic>
           <robotNamespace/>
         </plugin>
       </sensor>

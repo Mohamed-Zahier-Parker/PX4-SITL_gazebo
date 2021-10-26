@@ -484,6 +484,7 @@ void MavlinkInterface::handle_message(mavlink_message_t *msg)
 {
   switch (msg->msgid) {
   case MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS:
+    {
     const std::lock_guard<std::mutex> lock(actuator_mutex_);
 
     mavlink_hil_actuator_controls_t controls;
@@ -504,7 +505,31 @@ void MavlinkInterface::handle_message(mavlink_message_t *msg)
     received_actuator_ = true;
     received_first_actuator_ = true;
     break;
+    }
+  case MAVLINK_MSG_ID_SM_STATE:
+    {
+    handle_sm_state(msg);
+    break;
+    }
+  default:
+    break;
   }
+}
+
+void MavlinkInterface::handle_sm_state(mavlink_message_t *msg){
+  mavlink_sm_state_t sm_state_receive;
+  mavlink_msg_sm_state_decode(msg, &sm_state_receive);
+  sm_state=sm_state_receive.state;
+
+
+  // mp_msgs::msgs::StateMachineState sm_state_msg;
+  // sm_state_msg.set_sm_state(sm_state_receive.state);
+
+  // sm_state_pub_->Publish(sm_state_msg);
+}
+
+int MavlinkInterface::GetSMState() {
+  return sm_state;
 }
 
 void MavlinkInterface::forward_mavlink_message(const mavlink_message_t *message)
