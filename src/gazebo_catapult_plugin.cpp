@@ -108,7 +108,7 @@ void CatapultPlugin::OnUpdate(const common::UpdateInfo&){
       #endif
         launch_status_ = VEHICLE_INLAUNCH;
         std::cout << "[gazebo_catapult_plugin] Catapult armed " << std::endl;
-      
+
       } else { // launch_status = VEHICLE_INLAUNCH
         //Define launch direction
         ignition::math::Vector3d direction(1.0, 0.0, 2.0);
@@ -116,7 +116,7 @@ void CatapultPlugin::OnUpdate(const common::UpdateInfo&){
 
         //Apply force to the vehicle
         ignition::math::Vector3d force = force_magnitude_ * direction;
-        this->link_->AddForce(force);     
+        this->link_->AddRelativeForce(force);
         #if GAZEBO_MAJOR_VERSION >= 9
           common::Time curr_time = world_->SimTime();
         #else

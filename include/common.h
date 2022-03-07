@@ -245,9 +245,14 @@ static const ignition::math::Vector3d kLeftRotation = ignition::math::Vector3d(0
 static const ignition::math::Vector3d kRightRotation = ignition::math::Vector3d(0, -1, 0);
 
 // Zurich Irchel Park
-static constexpr const double kDefaultHomeLatitude = 47.397742 * M_PI / 180.0;   // rad
-static constexpr const double kDefaultHomeLongitude = 8.545594 * M_PI / 180.0;   // rad
-static constexpr const double kDefaultHomeAltitude = 488.0;                      // meters
+// static constexpr const double kDefaultHomeLatitude = 47.397742 * M_PI / 180.0;   // rad
+// static constexpr const double kDefaultHomeLongitude = 8.545594 * M_PI / 180.0;   // rad
+// static constexpr const double kDefaultHomeAltitude = 488.0;                      // meters
+
+// Helderberg Radio Flyers
+static constexpr const double kDefaultHomeLatitude = -34.0473810 * M_PI / 180.0;  // rad
+static constexpr const double kDefaultHomeLongitude = 18.7405320 * M_PI / 180.0; //rad
+static constexpr const double kDefaultHomeAltitude = 10.3;                   // meters
 
 // Earth radius
 // static constexpr const double earth_radius = 6353000.0;      // meters

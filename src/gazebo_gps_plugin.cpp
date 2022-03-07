@@ -307,8 +307,10 @@ void GpsPlugin::OnWorldUpdate(const common::UpdateInfo& /*_info*/)
   gps_msg.set_longitude_deg(latlon.second * 180.0 / M_PI);
   gps_msg.set_altitude(pos_W_I.Z() + alt_home_ - noise_gps_pos_.Z() + gps_bias_.Z());
 
-  std_xy_ = 1.0;
-  std_z_ = 1.0;
+  // std_xy_ = 1.0;
+  // std_z_ = 1.0;
+  std_xy_ = 0.01;
+  std_z_ = 0.01;
   gps_msg.set_eph(std_xy_);
   gps_msg.set_epv(std_z_);
 

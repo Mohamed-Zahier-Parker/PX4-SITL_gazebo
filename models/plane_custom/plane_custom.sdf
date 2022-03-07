@@ -6,14 +6,14 @@
       <pose>0 0 0 0 0 0</pose>
       <inertial>
         <pose>0 0 0 0 0 0</pose>
-        <mass>6.35</mass>
+        <mass>5.885</mass>
         <inertia>
-          <ixx>0.722</ixx>
+          <ixx>0.486602</ixx>
           <ixy>0</ixy>
           <ixz>0</ixz>
-          <iyy>0.514</iyy>
+          <iyy>0.47552</iyy>
           <iyz>0</iyz>
-          <izz>0.925</izz>
+          <izz>0.86461</izz>
         </inertia>
       </inertial>
       <collision name='base_link_collision'>

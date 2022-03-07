@@ -53,7 +53,8 @@ static constexpr double kDefaultAdisAccelerometerBiasCorrelationTime =
 static constexpr double kDefaultAdisAccelerometerTurnOnBiasSigma =
     20.0e-3 * 9.8;
 // Earth's gravity in Zurich (lat=+47.3667degN, lon=+8.5500degE, h=+500m, WGS84)
-static constexpr double kDefaultGravityMagnitude = 9.8068;
+// static constexpr double kDefaultGravityMagnitude = 9.8068;
+static constexpr double kDefaultGravityMagnitude = 9.8099;//HRF gravity
 
 static const std::string kDefaultImuTopic = "imu";
 
