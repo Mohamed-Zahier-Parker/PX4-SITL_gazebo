@@ -132,7 +132,7 @@ void BarometerPlugin::OnUpdate(const common::UpdateInfo&)
 #endif
   const double dt = (current_time - last_pub_time_).Double();
 
-  if (dt > 1.0 / pub_rate_) {
+  if (dt >= 1.0 / pub_rate_) {
 
     // get pose of the model that the plugin is attached to
 #if GAZEBO_MAJOR_VERSION >= 9

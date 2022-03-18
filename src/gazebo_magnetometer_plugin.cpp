@@ -177,7 +177,7 @@ void MagnetometerPlugin::OnUpdate(const common::UpdateInfo&)
 #endif
   double dt = (current_time - last_pub_time_).Double();
 
-  if (dt > 1.0 / pub_rate_) {
+  if (dt >= 1.0 / pub_rate_) {
 
     // Magnetic field data from WMM2018 (10^5xnanoTesla (N, E D) n-frame )
 
