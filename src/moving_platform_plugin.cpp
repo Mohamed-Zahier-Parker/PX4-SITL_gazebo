@@ -121,18 +121,23 @@ double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo orig
   //  int sm_state_out = 0;//For testing
 
   //Platform velocities
-  ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(1.00,0.00,0.00);// Velocity to reach starting point
-  ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(10.00,0.00,0.00);// Velocity to move with
-  ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(-10.00,0.00,0.00);// Velocity to return to starting point
+  // ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(1.00,0.00,0.00);// Velocity to reach starting point
+  ignition::math::Vector3d mp_initial_velocity=ignition::math::Vector3d(-0.2777,0.9607,0.00);// Velocity to reach starting point
+  // ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(10.00,0.00,0.00);// Velocity to move with
+  ignition::math::Vector3d mp_normal_velocity=ignition::math::Vector3d(-0.8331,2.8820,0.00);// Velocity to move with
+  // ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(-10.00,0.00,0.00);// Velocity to return to starting point
+  ignition::math::Vector3d mp_return_velocity=ignition::math::Vector3d(2.7770,-9.6067,0.00);// Velocity to return to starting point
 
   //move to start position
-  if(dT_defl_ > 0.00 && (pose.X()-offset_plat[0])<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
+  // if(dT_defl_ > 0.00 && (pose.X()-offset_plat[0])<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
+  if(dT_defl_ > 0.00 && (pose.X()-offset_plat[0])>=0.0 && (pose.Y()-offset_plat[1])<=0.0 && sm_state_out==0 && !start_initial_mp_movement && !end_initial_mp_movement){
     start_initial_mp_movement=true;
     std::cout<<"Move platform to start position\n";
-    this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
-  }else if(start_initial_mp_movement && (pose.X()-offset_plat[0])<0.0){
+    this->link->AddRelativeForce({100,100,0});//Need initial force to get it moving due to ground plane having static friction
+  }else if(start_initial_mp_movement && ((pose.X()-offset_plat[0])>0.0 && (pose.Y()-offset_plat[1])<0.0)){
     this->link->SetLinearVel(mp_initial_velocity);
-  }else if(start_initial_mp_movement && (pose.X()-offset_plat[0])>=0.0)
+    // std::cout<<"mp_x : "<<vel.X()<<" ; mp_y : "<<vel.Y()<<"\n";
+  }else if(start_initial_mp_movement && ((pose.X()-offset_plat[0])<=0.0 || (pose.Y()-offset_plat[1])>=0.0))
   {
     this->link->SetLinearVel({0, 0, 0});
     start_initial_mp_movement=false;
@@ -141,16 +146,17 @@ double offset_plat[3]={0.0,0.0,0.0};//offset of uav spawn point with gazebo orig
 
   // Move platform for FW UAV landing
   if(end_initial_mp_movement){
-    if(sm_state_out==0 && (pose.X()-offset_plat[0])>0.1 && !end_state_mp_movement){ //Check Abort case
+    if(sm_state_out==0 && (pose.X()-offset_plat[0])<0.1 && (pose.Y()-offset_plat[1])>0.1 && !end_state_mp_movement){ //Check Abort case
       this->link->SetLinearVel(mp_return_velocity);
       start_state_mp_movement=false;
     }else if(sm_state_out>=1 && !start_state_mp_movement && !end_state_mp_movement){
       start_state_mp_movement=true;
       std::cout<<"Landing platform moving\n";
-      this->link->AddRelativeForce({100,0,0});//Need initial force to get it moving due to ground plane having static friction
-    }else if(start_state_mp_movement && sm_state_out!=6 && !end_state_mp_movement){
+      this->link->AddRelativeForce({100,100,0});//Need initial force to get it moving due to ground plane having static friction
+    }else if(start_state_mp_movement && sm_state_out!=7 && !end_state_mp_movement){
 	    this->link->SetLinearVel(mp_normal_velocity);
-    }else if(sm_state_out==6 && !end_state_mp_movement && start_state_mp_movement){
+      // std::cout<<"mp_x : "<<vel.X()<<" ; mp_y : "<<vel.Y()<<"\n";
+    }else if(sm_state_out==7 && !end_state_mp_movement && start_state_mp_movement){
       this->link->SetLinearVel(ignition::math::Vector3(0.00,0.00,0.00));
       end_state_mp_movement=true;
       std::cout<<"Gazebo_comp_mp_x : "<<(pose.Y()-offset_plat[1])<<" Gazebo_comp_mp_y : "<<(pose.X()-offset_plat[0])<<" Gazebo_comp_mp_z : "<<(-(pose.Z()+0.176*0-offset_plat[2]))<<"\n";

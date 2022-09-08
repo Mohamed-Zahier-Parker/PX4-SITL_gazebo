@@ -9,12 +9,12 @@
     <include>
       <uri>model://ground_plane_custom</uri>
     </include>
-    <include>
-      <uri>model://asphalt_plane_custom</uri>
-    </include>
     <!-- <include>
-      <uri>model://moving_platform</uri>
+      <uri>model://asphalt_plane_custom</uri>
     </include> -->
+    <include>
+      <uri>model://moving_platform</uri>
+    </include>
     <physics name='default_physics' default='0' type='ode'>
       <gravity>0 0 -9.8066</gravity>
       <ode>
